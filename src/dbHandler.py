@@ -52,7 +52,7 @@ def outputPostgres(dbconnstr, queue):
                         "next_hop='%s', src_asn=%s, src_addr='%s' " \
                         "WHERE prefix='%s'"
     insert_validity =   "INSERT INTO t_validity (prefix, origin, state, ts, roa_prefix, roa_maxlen, roa_asn, next_hop, src_asn, src_addr) " \
-                        "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s " \
+                        "SELECT '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' " \
                         "WHERE NOT EXISTS (SELECT 1 FROM t_validity WHERE prefix='%s')"
     while True:
         data = queue.get()
