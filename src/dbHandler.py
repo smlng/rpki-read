@@ -47,13 +47,13 @@ def outputPostgres(dbconnstr, queue):
         print_error("connecting to database")
         sys.exit(1)
     cur = con.cursor()
-    update_validity =   "UPDATE t_validity SET state='%s', ts='%s', " \
-                        "roa_prefix='%s', roa_maxlen=%s, roa_asn=%s, " \
-                        "next_hop='%s', src_asn=%s, src_addr='%s' " \
-                        "WHERE prefix='%s'"
+    update_validity =   "UPDATE t_validity SET state=%s, ts='%s', " \
+                        "roa_prefix=%s, roa_maxlen=%s, roa_asn=%s, " \
+                        "next_hop=%s, src_asn=%s, src_addr=%s " \
+                        "WHERE prefix=%s"
     insert_validity =   "INSERT INTO t_validity (prefix, origin, state, ts, roa_prefix, roa_maxlen, roa_asn, next_hop, src_asn, src_addr) " \
-                        "SELECT '%s', %s, '%s', '%s', '%s', %s, %s, '%s', %s, '%s' " \
-                        "WHERE NOT EXISTS (SELECT 1 FROM t_validity WHERE prefix='%s')"
+                        "SELECT %s, %s, %s, '%s', %s, %s, %s, %s, %s, %s " \
+                        "WHERE NOT EXISTS (SELECT 1 FROM t_validity WHERE prefix=%s)"
     while True:
         data = queue.get()
         if (data == 'DONE'):
@@ -65,7 +65,7 @@ def outputPostgres(dbconnstr, queue):
                 vl = vr['validity']
                 vp = vl['VRPs']
                 src = data['source']
-                roa = {'prefix':'NULL', 'maxlen':'NULL', 'asn':'NULL'}
+                roa = {'prefix':None, 'maxlen':None, 'asn':None}
                 if vl['code'] == 0:
                     roa = vp['matched']
                 elif vl['code'] == 3:
@@ -100,8 +100,8 @@ def outputPostgres(dbconnstr, queue):
                     int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
                 print_info("converted unix timestamp: " + ts_str)
                 src = data['source']
-                update_str = update_validity % ('withdrawn', ts_str, 'NULL',
-                    'NULL', 'NULL', 'NULL', src['asn'], src['addr'],
+                update_str = update_validity % ('withdrawn', ts_str, None,
+                    None, None, None, src['asn'], src['addr'],
                     data['prefix'])
                 print_info("UPDATE: " + update_str)
                 try:
