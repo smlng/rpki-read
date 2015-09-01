@@ -47,7 +47,7 @@ def outputPostgres(dbconnstr, queue):
         print_error("connecting to database")
         sys.exit(1)
     cur = con.cursor()
-    update_validity =   "UPDATE t_validity SET state=%s, ts='%s', " \
+    update_validity =   "UPDATE t_validity SET state='%s', ts='%s', " \
                         "roa_prefix='%s', roa_maxlen=%s, roa_asn=%s, " \
                         "next_hop='%s', src_asn=%s, src_addr='%s' " \
                         "WHERE prefix='%s'"
@@ -65,7 +65,7 @@ def outputPostgres(dbconnstr, queue):
                 vl = vr['validity']
                 vp = vl['VRPs']
                 src = data['source']
-                roa = {'prefix':None, 'maxlen':None, 'asn':None}
+                roa = {'prefix':'0.0.0.0', 'maxlen':0, 'asn':0}
                 if vl['code'] == 0:
                     roa = vp['matched']
                 elif vl['code'] == 3:
