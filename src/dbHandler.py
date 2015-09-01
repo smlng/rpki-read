@@ -77,11 +77,11 @@ def outputPostgres(dbconnstr, queue):
                 src = data['source']
                 roa = {'prefix':'0.0.0.0', 'maxlen':0, 'asn':0}
                 if vl['code'] == 0:
-                    roa = vp['matched']
+                    roa = vp['matched'][0]
                 elif vl['code'] == 3:
-                    roa = vp['unmatched_as']
+                    roa = vp['unmatched_as'][0]
                 elif vl['code'] == 4:
-                    roa = vp['unmatched_length']
+                    roa = vp['unmatched_length'][0]
 
                 ts_str = datetime.fromtimestamp(
                         int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
