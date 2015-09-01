@@ -87,13 +87,13 @@ def outputPostgres(dbconnstr, queue):
                         int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
                 print_info("converted unix timestamp: " + ts_str)
                 update_str = update_validity % (vl['state'], ts_str,
-                    roa['prefix'], roa['maxlen'], roa['asn'],
+                    roa['prefix'], roa['max_length'], roa['asn'],
                     data['next_hop'], src['asn'], src['addr'],
                     rt['prefix'])
                 print_info("UPDATE: " + update_str)
                 insert_str = insert_validity % (rt['prefix'],
                     rt['origin_asn'][2:], vl['state'], ts_str,
-                    roa['prefix'], roa['maxlen'], roa['asn'],
+                    roa['prefix'], roa['max_length'], roa['asn'],
                     data['next_hop'], src['asn'], src['addr'],
                     rt['prefix'])
                 print_info("INSERT: " + insert_str)
