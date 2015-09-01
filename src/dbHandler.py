@@ -64,6 +64,7 @@ def outputPostgres(dbconnstr, queue):
                 rt = vr['route']
                 vl = vr['validity']
                 vp = vl['VRPs']
+                src = data['source']
                 roa = {'prefix':None, 'maxlen':None, 'asn':None}
                 if vl['code'] == 0:
                     roa = vp['matched']
@@ -77,13 +78,13 @@ def outputPostgres(dbconnstr, queue):
                 print_info("converted unix timestamp: " + ts_str)
                 update_str = update_validity % (vl['state'], ts_str,
                     roa['prefix'], roa['maxlen'], roa['asn'],
-                    data['next_hop'], data['src_asn'], data['src_addr'],
+                    data['next_hop'], src['asn'], src['addr'],
                     rt['prefix'])
                 print_info("UPDATE: " + update_str)
                 insert_str = insert_validity % (rt['prefix'],
                     rt['origin_asn'][2:], vl['state'], ts_str,
                     roa['prefix'], roa['maxlen'], roa['asn'],
-                    data['next_hop'], data['src_asn'], data['src_addr'],
+                    data['next_hop'], src['asn'], src['addr'],
                     rt['prefix'])
                 print_info("INSERT: " + insert_str)
                 try:
@@ -95,14 +96,15 @@ def outputPostgres(dbconnstr, queue):
                     print_error("... failed with: %s" % (e.message))
                     con.rollback()
             elif (data['type'] == 'withdraw') and (keepwithdrawn):
+                ts_str = datetime.fromtimestamp(
+                    int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
+                print_info("converted unix timestamp: " + ts_str)
+                src = data['source']
+                update_str = update_validity % ('withdrawn', ts_str, None,
+                    None, None, None, src['asn'], src['addr'],
+                    data['prefix'])
+                print_info("UPDATE: " + update_str)
                 try:
-                    ts_str = datetime.fromtimestamp(
-                        int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
-                    print_info("converted unix timestamp: " + ts_str)
-                    update_str = update_validity % ('withdrawn', ts_str, None,
-                        None, None, None, data['src_asn'], data['src_addr'],
-                        data['prefix'])
-                    print_info("UPDATE: " + update_str)
                     cur.execute(update_str)
                     con.commit()
                 except Exception, e:
