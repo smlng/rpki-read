@@ -75,7 +75,7 @@ def outputPostgres(dbconnstr, queue):
                 vl = vr['validity']
                 vp = vl['VRPs']
                 src = data['source']
-                roa = {'prefix':'0.0.0.0', 'max_length':0, 'asn':0}
+                roa = {'prefix':'0.0.0.0', 'max_length':0, 'asn':'AS0'}
                 if vl['code'] == 0:
                     roa = vp['matched'][0]
                 elif vl['code'] == 3:
