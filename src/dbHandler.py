@@ -64,15 +64,19 @@ def outputPostgres(dbconnstr, queue):
                     ts_str = datetime.fromtimestamp(
                         int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
                     print_info("converted unix timestamp: " + ts_str)
-                    cur.execute(update_validity, [data['state'], ts_str,
+                    update_str = update_validity % (data['state'], ts_str,
                         data['roa_prefix'], data['roa_maxlen'], data['roa_asn'],
                         data['next_hop'], data['src_asn'], data['src_addr'],
-                        data['prefix'], data['origin']])
-                    cur.execute(insert_validity, [data['prefix'],
+                        data['prefix'], data['origin'])
+                    print_info("UPDATE: " + update_str)
+                    cur.execute(update_str)
+                    insert_str = insert_validity % (data['prefix'],
                         data['origin'], data['state'], ts_str,
                         data['roa_prefix'], data['roa_maxlen'], data['roa_asn'],
                         data['next_hop'], data['src_asn'], data['src_addr'],
-                        data['prefix'], data['origin']])
+                        data['prefix'], data['origin'])
+                    print_info("INSERT: " + insert_str)
+                    cur.execute(insert_str)
                     con.commit()
                 except Exception, e:
                     print_error("updating or inserting entry, announcement")
@@ -83,9 +87,11 @@ def outputPostgres(dbconnstr, queue):
                     ts_str = datetime.fromtimestamp(
                         int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
                     print_info("converted unix timestamp: " + ts_str)
-                    cur.execute(update_validity, ['withdrawn', ts_str, None,
+                    update_str = update_validity % ('withdrawn', ts_str, None,
                         None, None, None, data['src_asn'], data['src_addr'],
-                        data['prefix'], data['origin']])
+                        data['prefix'], data['origin'])
+                    print_info("UPDATE: " + update_str)
+                    cur.execute(update_str)
                     con.commit()
                 except Exception, e:
                     print_error("updating entry, withdraw")
