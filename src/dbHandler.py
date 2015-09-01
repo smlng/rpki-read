@@ -54,7 +54,16 @@ def outputPostgres(dbconnstr, queue):
     insert_validity =   "INSERT INTO t_validity (prefix, origin, state, ts, roa_prefix, roa_maxlen, roa_asn, next_hop, src_asn, src_addr) " \
                         "SELECT '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' " \
                         "WHERE NOT EXISTS (SELECT 1 FROM t_validity WHERE prefix='%s')"
-    delete_validty =    "DELETE FROM t_validity WHERE prefix='%s'"
+    delete_validty =    "DELETE FROM t_validity WHERE prefix=%s"
+    delete_all =        "DELETE FROM t_validity *"
+    try:
+        cur.execute(delete_all)
+        con.commit()
+    except Exception, e:
+        print_error("deleting all existing entries")
+        print_error("... failed with: %s" % (e.message))
+        con.rollback()
+
     while True:
         data = queue.get()
         if (data == 'DONE'):
