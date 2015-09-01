@@ -47,13 +47,13 @@ def outputPostgres(dbconnstr, queue):
         print_error("connecting to database")
         sys.exit(1)
     cur = con.cursor()
-    update_validity =   "UPDATE t_validity SET state=%s, ts=%s, " \
-                        "roa_prefix=%s, roa_maxlen=%s, roa_asn=%s, " \
-                        "next_hop=%s, src_asn=%s, src_addr=%s " \
-                        "WHERE prefix=%s"
+    update_validity =   "UPDATE t_validity SET state='%s', ts='%s', " \
+                        "roa_prefix='%s', roa_maxlen=%s, roa_asn=%s, " \
+                        "next_hop='%s', src_asn=%s, src_addr='%s' " \
+                        "WHERE prefix='%s'"
     insert_validity =   "INSERT INTO t_validity (prefix, origin, state, ts, roa_prefix, roa_maxlen, roa_asn, next_hop, src_asn, src_addr) " \
-                        "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s " \
-                        "WHERE NOT EXISTS (SELECT 1 FROM t_validity WHERE prefix=%s)"
+                        "SELECT '%s', %s, '%s', '%s', '%s', %s, %s, '%s', %s, '%s' " \
+                        "WHERE NOT EXISTS (SELECT 1 FROM t_validity WHERE prefix='%s')"
     while True:
         data = queue.get()
         if (data == 'DONE'):
