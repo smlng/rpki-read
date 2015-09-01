@@ -65,7 +65,7 @@ def outputPostgres(dbconnstr, queue):
                 vl = vr['validity']
                 vp = vl['VRPs']
                 src = data['source']
-                roa = {'prefix':None, 'maxlen':None, 'asn':None}
+                roa = {'prefix':'NULL', 'maxlen':'NULL', 'asn':'NULL'}
                 if vl['code'] == 0:
                     roa = vp['matched']
                 elif vl['code'] == 3:
@@ -100,8 +100,8 @@ def outputPostgres(dbconnstr, queue):
                     int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
                 print_info("converted unix timestamp: " + ts_str)
                 src = data['source']
-                update_str = update_validity % ('withdrawn', ts_str, None,
-                    None, None, None, src['asn'], src['addr'],
+                update_str = update_validity % ('withdrawn', ts_str, 'NULL',
+                    'NULL', 'NULL', 'NULL', src['asn'], src['addr'],
                     data['prefix'])
                 print_info("UPDATE: " + update_str)
                 try:
