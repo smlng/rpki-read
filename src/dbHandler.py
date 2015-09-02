@@ -149,13 +149,13 @@ def main():
     db = parser.add_mutually_exclusive_group(required=True)
     db.add_argument(    '-c', '--couchdb',
                         help='CouchDB connection parameters.',
-                        default='', type=str)
+                        default=False)
     db.add_argument(    '-m', '--mongodb',
                         help='MongoDB connection parameters.',
-                        default='', type=str)
+                        default=False)
     db.add_argument(    '-p', '--postgres',
                         help='PostgreSQL connection parameters.',
-                        default='dbname=lbv', type=str)
+                        default=False)
 
     args = vars(parser.parse_args())
 
@@ -165,15 +165,23 @@ def main():
     warning   = args['warning']
     global logging
     logging = args['logging']
-
-    dbconnstr = args['database'].strip()
     global keepwithdrawn
     keepwithdrawn = args['keepwithdrawn']
+
+    queue = mp.Queue()
     # BEGIN
     print_log(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " starting ...")
-    queue = mp.Queue()
-    output_p = mp.Process(target=outputPostgres,
-                           args=(dbconnstr,queue))
+    if args['couchdb']:
+        print_error("Support for CouchDB not implemented yet!")
+        sys.exit(1)
+    if args['mongodb']:
+        print_error("Support for MongoDB not implemented yet!")
+        sys.exit(1)
+    if args['postgres']:
+        dbconnstr = args['postgres'].strip()
+        output_p = mp.Process(  target=outputPostgres,
+                                args=(dbconnstr,queue))
+
     output_p.start()
     # main loop
     while True:
