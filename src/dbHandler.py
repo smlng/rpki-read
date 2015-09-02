@@ -85,18 +85,18 @@ def outputPostgres(dbconnstr, queue):
 
                 ts_str = datetime.fromtimestamp(
                         int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
-                print_info("converted unix timestamp: " + ts_str)
+                #print_info("converted unix timestamp: " + ts_str)
                 update_str = update_validity % (vl['state'], ts_str,
                     roa['prefix'], roa['max_length'], roa['asn'][2:],
                     data['next_hop'], src['asn'], src['addr'],
                     rt['prefix'])
-                print_info("UPDATE: " + update_str)
+                #print_info("UPDATE: " + update_str)
                 insert_str = insert_validity % (rt['prefix'],
                     rt['origin_asn'][2:], vl['state'], ts_str,
                     roa['prefix'], roa['max_length'], roa['asn'][2:],
                     data['next_hop'], src['asn'], src['addr'],
                     rt['prefix'])
-                print_info("INSERT: " + insert_str)
+                #print_info("INSERT: " + insert_str)
                 try:
                     cur.execute(update_str)
                     cur.execute(insert_str)
@@ -109,12 +109,12 @@ def outputPostgres(dbconnstr, queue):
                 if keepwithdrawn:
                     ts_str = datetime.fromtimestamp(
                         int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
-                    print_info("converted unix timestamp: " + ts_str)
+                    #print_info("converted unix timestamp: " + ts_str)
                     src = data['source']
                     update_str = update_validity % ('withdrawn', ts_str, None,
                         None, None, None, src['asn'], src['addr'],
                     data['prefix'])
-                    print_info("UPDATE: " + update_str)
+                    #print_info("UPDATE: " + update_str)
                     try:
                         cur.execute(update_str)
                         con.commit()
@@ -146,9 +146,16 @@ def main():
                         help='Verbose output.', action='store_true')
     parser.add_argument('-k', '--keepwithdrawn',
                         help='Keep withdrawn prefixes.', action='store_true')
-    parser.add_argument('-d', '--database',
-                        help='Postgres database connection parameters.',
-                        default='dbname=lbv', type=str, required=True)
+    db = parser.add_mutually_exclusive_group(required=True)
+    db.add_argument(    '-c', '--couchdb',
+                        help='CouchDB connection parameters.',
+                        default='', type=str)
+    db.add_argument(    '-m', '--mongodb',
+                        help='MongoDB connection parameters.',
+                        default='', type=str)
+    db.add_argument(    '-p', '--postgres',
+                        help='PostgreSQL connection parameters.',
+                        default='dbname=lbv', type=str)
 
     args = vars(parser.parse_args())
 
