@@ -79,9 +79,9 @@ def outputPostgres(dbconnstr, queue):
                         int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
                 #print_info("converted unix timestamp: " + ts_str)
                 try:
-                    cur.execute(update, [ vl['state'], ts_str, Json(roas),
+                    cur.execute(update_validity, [ vl['state'], ts_str, Json(roas),
                         data['next_hop'], src['asn'], src['addr'], rt['prefix'] ])
-                    cur.execute(insert, [rt['prefix'], rt['origin_asn'][2:],
+                    cur.execute(insert_validity, [rt['prefix'], rt['origin_asn'][2:],
                         vl['state'], ts_str, Json(roas),
                         data['next_hop'], src['asn'], src['addr'], rt['prefix']])
                     con.commit()
@@ -96,7 +96,7 @@ def outputPostgres(dbconnstr, queue):
                     #print_info("converted unix timestamp: " + ts_str)
                     src = data['source']
                     try:
-                        cur.execute(update, ['withdrawn', ts_str, None,
+                        cur.execute(update_validity, ['withdrawn', ts_str, None,
                             None, src['asn'], src['addr'], data['prefix']] )
                         con.commit()
                     except Exception, e:
