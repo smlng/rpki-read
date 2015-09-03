@@ -15,6 +15,7 @@ import sys
 import multiprocessing as mp
 from datetime import datetime
 from subprocess import PIPE, Popen
+from psycopg2.extras import Json
 
 from settings import *
 
@@ -47,12 +48,10 @@ def outputPostgres(dbconnstr, queue):
         print_error("connecting to database")
         sys.exit(1)
     cur = con.cursor()
-    update_validity =   "UPDATE t_validity SET state='%s', ts='%s', " \
-                        "roa_prefix='%s', roa_maxlen=%s, roa_asn=%s, " \
-                        "next_hop='%s', src_asn=%s, src_addr='%s' " \
-                        "WHERE prefix='%s'"
-    insert_validity =   "INSERT INTO t_validity (prefix, origin, state, ts, roa_prefix, roa_maxlen, roa_asn, next_hop, src_asn, src_addr) " \
-                        "SELECT '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' " \
+    update_validity =   "UPDATE t_validity SET state='%s',ts='%s',roas=%s, " \
+                        "next_hop='%s',src_asn=%s,src_addr='%s' WHERE prefix='%s'"
+    insert_validity =   "INSERT INTO t_validity (prefix, origin, state, ts, roas, next_hop, src_asn, src_addr) " \
+                        "SELECT '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' " \
                         "WHERE NOT EXISTS (SELECT 1 FROM t_validity WHERE prefix='%s')"
     delete_validty =    "DELETE FROM t_validity WHERE prefix=%s"
     delete_all =        "DELETE FROM t_validity *"
@@ -73,33 +72,18 @@ def outputPostgres(dbconnstr, queue):
                 vr = data['validated_route']
                 rt = vr['route']
                 vl = vr['validity']
-                vp = vl['VRPs']
+                roas = vl['VRPs']
                 src = data['source']
-                roa = {'prefix':'0.0.0.0', 'max_length':0, 'asn':'AS0'}
-                if vl['code'] == 0:
-                    roa = vp['matched'][0]
-                elif vl['code'] == 3:
-                    roa = vp['unmatched_as'][0]
-                elif vl['code'] == 4:
-                    roa = vp['unmatched_length'][0]
 
                 ts_str = datetime.fromtimestamp(
                         int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
                 #print_info("converted unix timestamp: " + ts_str)
-                update_str = update_validity % (vl['state'], ts_str,
-                    roa['prefix'], roa['max_length'], roa['asn'][2:],
-                    data['next_hop'], src['asn'], src['addr'],
-                    rt['prefix'])
-                #print_info("UPDATE: " + update_str)
-                insert_str = insert_validity % (rt['prefix'],
-                    rt['origin_asn'][2:], vl['state'], ts_str,
-                    roa['prefix'], roa['max_length'], roa['asn'][2:],
-                    data['next_hop'], src['asn'], src['addr'],
-                    rt['prefix'])
-                #print_info("INSERT: " + insert_str)
                 try:
-                    cur.execute(update_str)
-                    cur.execute(insert_str)
+                    cur.execute(update, [ vl['state'], ts_str, Json(roas),
+                        data['next_hop'], src['asn'], src['addr'], rt['prefix'] ])
+                    cur.execute(insert, [rt['prefix'], rt['origin_asn'][2:],
+                        vl['state'], ts_str, Json(roas),
+                        data['next_hop'], src['asn'], src['addr'], rt['prefix']])
                     con.commit()
                 except Exception, e:
                     print_error("updating or inserting entry, announcement")
@@ -111,12 +95,9 @@ def outputPostgres(dbconnstr, queue):
                         int(data['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
                     #print_info("converted unix timestamp: " + ts_str)
                     src = data['source']
-                    update_str = update_validity % ('withdrawn', ts_str, None,
-                        None, None, None, src['asn'], src['addr'],
-                    data['prefix'])
-                    #print_info("UPDATE: " + update_str)
                     try:
-                        cur.execute(update_str)
+                        cur.execute(update, ['withdrawn', ts_str, None,
+                            None, src['asn'], src['addr'], data['prefix']] )
                         con.commit()
                     except Exception, e:
                         print_error("updating entry, withdraw")
