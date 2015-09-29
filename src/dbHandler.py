@@ -115,6 +115,14 @@ def outputPostgres(dbconnstr, queue):
                 continue
         except Exception, e:
             print_error("outputPostgres failed with: %s" % (e.message))
+            if (con.closed):
+                try:
+                    con = psycopg2.connect(dbconnstr)
+                except Exception, e:
+                    print_error("failed with: %s" % (e.message))
+                    print_error("connecting to database")
+                    sys.exit(1)
+                cur = con.cursor()
     return True
 
 def main():
@@ -174,6 +182,10 @@ def main():
         else:
             queue.put(data)
             print_info("output queue size: " + str(queue.qsize()))
+            if (queue.qsize() > 100000):
+                print_warn("output queue size exceeds threshold, restart output thread!")
+                output_p.terminate()
+                output_p.start()
 
 if __name__ == "__main__":
     main()
