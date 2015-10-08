@@ -43,15 +43,27 @@
                 <p class="lead"> Latest Timestamp <span class="label label-info"> {{ stats.latest_ts }} </span></p>
             </div>
             <div class="col-md-3 col-xs-12">
-                <p class="lead"> # RIB entries <span class="label label-info"> {{ stats.sum_all }} </span></p>
+                <p class="lead"> # Origins <span class="label label-info"> {{ stats.sum_all }} </span></p>
             </div>
             <div class="col-md-3 col-xs-12">
-                <p class="lead"> with RPKI <span class="label label-info"> {{ stats.sum_val }} </span></p>
+                <p class="lead"> with ROA <span class="label label-info"> {{ stats.sum_val }} </span></p>
             </div>
         </div>
         <hr>
         <div class="row">
-            <div class="col-md-6 col-xs-12"><div id="piechart_all"></div></div>
-            <div class="col-md-6 col-xs-12"><div id="piechart_val"></div></div>
+            <div class="col-md-6 col-xs-12"><div class="thumbnail">
+                <div id="piechart_all"></div>
+                <div class="caption">
+                    <h3>All known Origins</h3>
+                    <p>bla bla bla bla</p>
+                </div>
+            </div></div>
+            <div class="col-md-6 col-xs-12"><div class="thumbnail">
+                <div id="piechart_val"></div>
+                <div class="caption">
+                    <h3>Origins with ROA</h3>
+                    <p>bla bla bla bla</p>
+                </div>
+            </div></div>
         </div>
 {% endblock %}
