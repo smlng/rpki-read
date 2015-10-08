@@ -39,19 +39,19 @@
 {% endblock %}
 {% block content %}
         <div class="row">
-            <div class="col-xs-6">
+            <div class="col-md-6 col-xs-12">
                 <p class="lead"> Latest Timestamp <span class="label label-info"> {{ stats.latest_ts }} </span></p>
             </div>
-            <div class="col-xs-3">
+            <div class="col-md-3 col-xs-12">
                 <p class="lead"> # RIB entries <span class="label label-info"> {{ stats.sum_all }} </span></p>
             </div>
-            <div class="col-xs-3">
+            <div class="col-md-3 col-xs-12">
                 <p class="lead"> with RPKI <span class="label label-info"> {{ stats.sum_val }} </span></p>
             </div>
         </div>
         <hr>
         <div class="row">
-            <div class="col-xs-6"><div id="piechart_all"></div></div>
-            <div class="col-xs-6"><div id="piechart_val"></div></div>
+            <div class="col-md-6 col-xs-12"><div id="piechart_all"></div></div>
+            <div class="col-md-6 col-xs-12"><div id="piechart_val"></div></div>
         </div>
 {% endblock %}
