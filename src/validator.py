@@ -16,7 +16,7 @@ from subprocess import PIPE, Popen
 
 # internal imports
 from settings import *
-from utils import print_error, print_info, print_log, print_warn
+from utils import *
 
 def _get_validity(validation_result_string):
     validity = dict()

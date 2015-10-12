@@ -18,7 +18,7 @@ from xml.dom import minidom
 from datetime import datetime
 
 from settings import default_bgpmon_server
-from utils import print_error, print_info, print_log, print_warn
+from utils import *
 
 def parse_bgp_message(xml):
     try:
