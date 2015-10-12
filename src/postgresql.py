@@ -80,6 +80,7 @@ def outputPostgres(dbconnstr, queue):
                         print_error("... failed with: %s" % (e.message))
                         con.rollback()
             else:
+                print_warn("Type not supported, must be either announcement or withdraw!")
                 continue
         except Exception, e:
             print_error("outputPostgres failed with: %s" % (e.message))
