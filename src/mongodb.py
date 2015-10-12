@@ -20,18 +20,18 @@ def outputMongoDB(dbconnstr, queue):
             print_info(".. process announcement")
             try:
                 db.validity.replace_one(
-                    {'validated_route.route.prefix' : data.validated_route.route.prefix},
+                    { 'validated_route' : { 'route' : { 'prefix' : data['validated_route']['route']['prefix'] } } },
                     data, True
                 )
             except Exception, e:
                 print_error("updating or inserting entry, announcement")
                 print_error("... failed with: %s" % (e.message))
         elif (data['type'] == 'withdraw'):
-            pring_info(".. process withdraw")
+            print_info(".. process withdraw")
             if keepwithdrawn:
                 try:
                     db.validity.update_one(
-                        {'validated_route.route.prefix' : data.prefix},
+                        { 'validated_route' : { 'route' : { 'prefix' : data['prefix'] } } },
                         {'type': 'withdraw','validated_route.validity.state': 'withdrawn' }
                     )
                 except Exception, e:
@@ -39,7 +39,7 @@ def outputMongoDB(dbconnstr, queue):
                     print_error("... failed with: %s" % (e.message))
             else:
                 try:
-                    db.validity.delete_one({'validated_route.route.prefix' : data.prefix})
+                    db.validity.delete_one({ 'validated_route' : { 'route' : { 'prefix' : data['prefix'] } } })
                 except Exception, e:
                     print_error("deleting entry, withdraw")
                     print_error("... failed with: %s" % (e.message))
