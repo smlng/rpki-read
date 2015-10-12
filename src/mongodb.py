@@ -5,7 +5,10 @@ from pymongo import MongoClient
 # internal imports
 from utils import print_error, print_info, print_log, print_warn
 
+keepwithdrawn = False
+
 def outputMongoDB(dbconnstr, queue):
+    print_log ("CALL outputMongoDB")
     client = MongoClient(dbconnstr)
     db = client['lbv']
 
@@ -14,6 +17,7 @@ def outputMongoDB(dbconnstr, queue):
         if (data == 'DONE'):
             break
         if data['type'] == 'announcement':
+            print_info(".. process announcement")
             try:
                 db.validity.replace_one(
                     {'validated_route.route.prefix' : data.validated_route.route.prefix},
@@ -23,6 +27,7 @@ def outputMongoDB(dbconnstr, queue):
                 print_error("updating or inserting entry, announcement")
                 print_error("... failed with: %s" % (e.message))
         elif (data['type'] == 'withdraw'):
+            pring_info(".. process withdraw")
             if keepwithdrawn:
                 try:
                     db.validity.update_one(

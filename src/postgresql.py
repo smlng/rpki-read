@@ -7,6 +7,8 @@ from psycopg2.extras import Json
 # internal imports
 from utils import print_error, print_info, print_log, print_warn
 
+keepwithdrawn = False
+
 def outputPostgres(dbconnstr, queue):
     print_info(dbconnstr)
     try:
