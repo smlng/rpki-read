@@ -20,14 +20,14 @@ def outputMongoDB(dbconnstr, queue):
                     { 'validated_route' : { 'route' : { 'prefix' : data['validated_route']['route']['prefix'] } } },
                     data, True
                 )
-                logging.debug("# matched: " + result.matched_count)
+                logging.debug("# matched: " + str(result.matched_count))
             except Exception, e:
                 logging.exception ("updating or inserting entry, failed with: %s ", e.message)
         elif (data['type'] == 'withdraw'):
             logging.info ("process withdraw")
             try:
                 result = db.validity.delete_one({ 'validated_route' : { 'route' : { 'prefix' : data['prefix'] } } })
-                logging.debug("# deleted: " + result.deleted_count)
+                logging.debug("# deleted: " + str(result.deleted_count))
             except Exception, e:
                 logging.exception ("deleting entry, failed with: %s" , e.message)
         else:
