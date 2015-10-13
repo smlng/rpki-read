@@ -14,18 +14,20 @@ def outputMongoDB(dbconnstr, queue):
         if (data == 'DONE'):
             break
         if data['type'] == 'announcement':
-            logging.info (".. process announcement")
+            logging.info ("process announcement")
             try:
-                db.validity.replace_one(
+                result = db.validity.replace_one(
                     { 'validated_route' : { 'route' : { 'prefix' : data['validated_route']['route']['prefix'] } } },
                     data, True
                 )
+                logging.debug("# matched: " + result.matched_count)
             except Exception, e:
                 logging.exception ("updating or inserting entry, failed with: %s ", e.message)
         elif (data['type'] == 'withdraw'):
-            logging.info (".. process withdraw")
+            logging.info ("process withdraw")
             try:
-                db.validity.delete_one({ 'validated_route' : { 'route' : { 'prefix' : data['prefix'] } } })
+                result = db.validity.delete_one({ 'validated_route' : { 'route' : { 'prefix' : data['prefix'] } } })
+                logging.debug("# deleted: " + result.deleted_count)
             except Exception, e:
                 logging.exception ("deleting entry, failed with: %s" , e.message)
         else:
