@@ -6,7 +6,8 @@ from pymongo import MongoClient
 def outputMongoDB(dbconnstr, queue):
     logging.debug ("CALL outputMongoDB")
     client = MongoClient(dbconnstr)
-    db = client['lbv']
+    db = client.get_default_database()
+    db.validity.drop()
 
     while True:
         data = queue.get()

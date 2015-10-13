@@ -7,7 +7,7 @@ from pymongo import MongoClient
 
 database = "mongodb"
 pg_dbconnstr = "dbname=lbv host=localhost port=5432"
-mg_dbconnstr = "mongodb://localhost:27017/"
+mg_dbconnstr = "mongodb://localhost:27017/lbv2"
 
 def get_validation_tables():
     if database == 'postgres':
@@ -21,12 +21,12 @@ def get_validation_stats():
         return pg_get_validation_stats(pg_dbconnstr)
     elif database == 'mongodb':
         return mg_get_validation_stats(mg_dbconnstr)
-    logging.warning ("NOT IMPLEMENTED YET!")"
+    logging.warning ("NOT IMPLEMENTED YET!")
     return ''
 
 def mg_get_validation_stats(dbconnstr):
     client = MongoClient(dbconnstr)
-    db = client['lbv']
+    db = client.get_default_database()
 
     table = [['Validity', 'Count'], ]
     sum_all = 0
