@@ -1,10 +1,10 @@
 import logging
+import pymongo
 
 from datetime import datetime
-from pymongo import MongoClient
 
 def get_validation_stats(dbconnstr):
-    client = MongoClient(dbconnstr)
+    client = pymongo.MongoClient(dbconnstr)
     db = client.get_default_database()
 
     stats = dict()
@@ -25,5 +25,22 @@ def get_validation_stats(dbconnstr):
 
     return stats
 
-def get_validation_tables(dbconnstr):
-    return '{}'
+def get_list(dbconnstr, validity):
+    client = pymongo.MongoClient(dbconnstr)
+    db = client.get_default_database()
+    rlist = []
+
+    try:
+        rset = db.validity.find({'validated_route.validity.state' : validity},{'_id' : 0, 'source' : 0, 'next_hop' : 0, 'type' : 0, 'timestamp' : 0})
+    except Exception, e:
+        logging.exception ("QUERY failed with: " + e.message)
+    else:
+        for r in rset:
+            data = dict()
+            data['prefix'] = r['validated_route']['route']['prefix']
+            data['origin'] = r['validated_route']['route']['origin_asn']
+            data['state'] = r['validated_route']['validity']['state']
+            data['roas'] = r['validated_route']['validity']['VRPs']
+            rlist.append(data)
+
+    return rlist

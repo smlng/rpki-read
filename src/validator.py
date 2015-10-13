@@ -65,10 +65,10 @@ def _get_validity(validation_result_string):
                     validity['VRPs']['matched'].append(vrp)
             # END (for r in reasons_array)
             if validity['code'] == 2:
-                if len(reasons_array) == len(validity['VRPs']['unmatched_as']):
+                if len(validity['VRPs']['unmatched_as']) > 0:
                     validity['code'] = 3
                     validity['reason'] = 'as'
-                elif len(reasons_array) == len(validity['VRPs']['unmatched_length']):
+                elif len(validity['VRPs']['unmatched_length']) > 0:
                     validity['code'] = 4
                     validity['reason'] = 'length'
             # END (if validity['code'] == 2)

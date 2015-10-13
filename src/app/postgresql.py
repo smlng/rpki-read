@@ -45,34 +45,29 @@ def get_validation_stats(dbconnstr):
 
     return stats
 
-def get_validation_tables(dbconnstr):
+def get_list(dbconnstr, validity):
     try:
         con = psycopg2.connect(dbconnstr)
     except Exception, e:
         logging.exception ("connecting to database, failed with: " + e.message)
         sys.exit(1)
     cur = con.cursor()
-    query = "SELECT prefix, origin, state, ts, roas FROM t_validity WHERE state != 'NotFound' ORDER BY origin"
-    tables = dict()
-    tables['valid'] = list()
-    tables['invalid_as'] = list()
-    tables['invalid_len'] = list()
+    query = "SELECT prefix, origin, state, roas FROM t_validity WHERE state = %s ORDER BY prefix"
+    rlist = []
+
     try:
-        cur.execute(query)
-        rs = cur.fetchall()
+        cur.execute(query, [validity])
+        rset = cur.fetchall()
     except Exception, e:
         logging.exception ("QUERY failed with: " + e.message)
         con.rollback()
     else:
-        for row in rs:
-            if row[2] == 'Valid':
-                tables['valid'].append([row[0],row[1],row[3]])
-            elif row[2] == 'InvalidAS':
-                tables['invalid_as'].append([row[0],row[1],row[3]])
-            else:
-                tables['invalid_len'].append([row[0],row[1],row[3]])
+        for r in rset:
+            data = dict()
+            data['prefix'] = r[0]
+            data['origin'] = 'AS'+str(r[1])
+            data['state'] = r[2]
+            data['roas'] = r[3]
+            rlist.append(data)
 
-    tables['num_valid'] = len(tables['valid'])
-    tables['num_invalid_as'] = len(tables['invalid_as'])
-    tables['num_invalid_len'] = len(tables['invalid_len'])
-    return tables
+    return rlist
