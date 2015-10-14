@@ -80,8 +80,8 @@ def stats():
     stats = get_validation_stats(config.DATABASE_CONN)
     table = [['Validity', 'Count']]
     table.append([ 'Valid', stats['num_valid'] ])
-    table.append([ 'Invalid AS', stats['num_invalid_as'] ])
     table.append([ 'Invalid Length', stats['num_invalid_len'] ])
+    table.append([ 'Invalid AS', stats['num_invalid_as'] ])
     stats['table_roa'] = table
     table_all = list(table)
     table_all.append([ 'Not Found', stats['num_not_found'] ])
