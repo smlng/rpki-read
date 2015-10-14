@@ -58,7 +58,7 @@ def _get_validity(validation_result_string):
                 if vasn != rasn:
                     validity['VRPs']['unmatched_as'].append(vrp)
                     match = False
-                if vlength > rmax_len:
+                elif vlength > rmax_len:
                     validity['VRPs']['unmatched_length'].append(vrp)
                     match = False
                 if match:
@@ -68,7 +68,7 @@ def _get_validity(validation_result_string):
                 if len(validity['VRPs']['unmatched_as']) > 0:
                     validity['code'] = 3
                     validity['reason'] = 'as'
-                elif len(validity['VRPs']['unmatched_length']) > 0:
+                if len(validity['VRPs']['unmatched_length']) > 0:
                     validity['code'] = 4
                     validity['reason'] = 'length'
             # END (if validity['code'] == 2)
