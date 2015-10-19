@@ -7,8 +7,12 @@
       google.setOnLoadCallback(drawChart);
       function drawChart() {
 
-        var data = google.visualization.arrayToDataTable({{ stats.table_all|tojson }});
-        var options = {
+        var pdata_all = google.visualization.arrayToDataTable({{ stats.table_all|tojson }});
+        var pdata_roa = google.visualization.arrayToDataTable({{ stats.table_roa|tojson }});
+        var ldata_all = google.visualization.arrayToDataTable({{ stats.stats_all|tojson }});
+        var ldata_roa = google.visualization.arrayToDataTable({{ stats.stats_roa|tojson }});
+
+        var popts_all = {
             title: 'Overall Validation Results',
             slices: {
                 0: { color: '#33a02c' },
@@ -19,11 +23,7 @@
             is3D: true,
             chartArea:{left:0,top:10,width:'100%',height:'100%'}
         };
-        var chart = new google.visualization.PieChart(document.getElementById('piechart_all'));
-        chart.draw(data, options);
-
-        var data_val = google.visualization.arrayToDataTable({{ stats.table_roa|tojson }});
-        var options_val = {
+        var popts_roa = {
           title: 'Validation States',
           slices: {
               0: { color: '#33a02c' },
@@ -33,24 +33,21 @@
           is3D: true,
           chartArea:{left:0,top:10,width:'100%',height:'100%'}
         };
-        var chart_val = new google.visualization.PieChart(document.getElementById('piechart_val'));
-        chart_val.draw(data_val, options_val);
-
-        var ldata_all = google.visualization.arrayToDataTable({{ stats.stats_all|tojson }});
-        var ldata_roa = google.visualization.arrayToDataTable({{ stats.stats_roa|tojson }});
-
         var lopts_all = {
-            title: 'Statistics over time'
+            title: 'Statistics over time',
             curveType: 'function',
             legend: {position: 'bottom'}
 
         };
-
         var lopts_roa = {};
 
+        var pchart_all = new google.visualization.PieChart(document.getElementById('piechart_all'));
+        var pchart_roa = new google.visualization.PieChart(document.getElementById('piechart_roa'));
         var lchart_all = new google.visualization.LineChart(document.getElementById('linechart_all'));
         var lchart_roa = new google.visualization.LineChart(document.getElementById('linechart_roa'));
 
+        pchart_all.draw(pdata_all, popts_all);
+        pchart_roa.draw(pdata_roa, popts_roa);
         lchart_all.draw(ldata_all, lopts_all);
         lchart_roa.draw(ldata_roa, lopts_roa);
 
@@ -106,8 +103,8 @@
                 <div class="panel-body">
                     <p></p>
                 </div>
-                <div id="piechart_val"></div>
-                <div id="linechart_val"></div>
+                <div id="piechart_roa"></div>
+                <div id="linechart_roa"></div>
             </div></div>
         </div>
 {% endblock %}
