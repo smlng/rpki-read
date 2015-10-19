@@ -19,11 +19,11 @@
         ldata_all_json = {{ stats.stats_all|tojson }}
         $.each(ldata_all_json, function(i,row) {
             ldata_all.addRow([
-                (new Date(row.timestamp)),
+                (new Date(row.ts*1000)),
                 parseInt(row.num_valid),
                 parseInt(row.num_invalid_len),
                 parseInt(row.num_invalid_as),
-                parseInt(row.num_notfound)
+                parseInt(row.num_not_found)
             ]);
         });
 
@@ -35,7 +35,7 @@
         ldata_roa_json = {{ stats.stats_roa|tojson }}
         $.each(ldata_roa_json, function(i,row) {
             ldata_roa.addRow([
-                (new Date(row.timestamp)),
+                (new Date(row.ts*1000)),
                 parseInt(row.num_valid),
                 parseInt(row.num_invalid_len),
                 parseInt(row.num_invalid_as)
