@@ -26,7 +26,7 @@ def output_stat(dbconnstr, interval):
             stats['num_invalid_len'] = db.validity.find({'validated_route.validity.state' : 'InvalidLength' }).count()
             stats['num_not_found'] = db.validity.find({'validated_route.validity.state' : 'NotFound' }).count()
             ts_tmp = db.validity.find_one(projection={'timestamp': True, '_id': False}, sort=[('timestamp', -1)])['timestamp']
-            stats['ts'] = datetime.fromtimestamp(int(ts_tmp)).strftime('%Y-%m-%d %H:%M:%S')
+            stats['ts'] = int(ts_tmp)
         except Exception, e:
             logging.exception ("QUERY failed with: " + e.message)
         else:
