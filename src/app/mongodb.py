@@ -20,10 +20,12 @@ def get_validation_stats(dbconnstr):
         stats['num_invalid_as'] = db.validity.find({'validated_route.validity.state' : 'InvalidAS' }).count()
         stats['num_invalid_len'] = db.validity.find({'validated_route.validity.state' : 'InvalidLength' }).count()
         stats['num_not_found'] = db.validity.find({'validated_route.validity.state' : 'NotFound' }).count()
-        stats_all_tmp = db.stats.find().map('function(s) { return [s.timestamp, s.num_valid, s.num_invalid_as, s.num_invalid_len, s.num_not_found]}')
-        stats['stats_all'] = stats['stats_all'].extend(stats_all_tmp)
-        stats_roa_tmp = db.stats.find().map('function(s) { return [s.timestamp, s.num_valid, s.num_invalid_as, s.num_invalid_len]}')
-        stats['stats_roa'] = stats['stats_roa'].extend(stats_roa_tmp)
+        stats_all_tmp = db.stats.find({},{'_id':0})
+        for x in stats_all_tmp:
+            stats['stats_all'].append(x.values())
+        stats_roa_tmp = db.stats.find({},{'_id':0, 'num_not_found':0})
+        for y in stats_roa_tmp:
+            stats['stats_roa'].append(y.values())
         ts_tmp = db.validity.find_one(projection={'timestamp': True, '_id': False}, sort=[('timestamp', -1)])['timestamp']
         stats['latest_ts'] = datetime.fromtimestamp(int(ts_tmp)).strftime('%Y-%m-%d %H:%M:%S')
     except Exception, e:
