@@ -16,13 +16,31 @@
         ldata_all.addColumn('number', 'Invalid Length');
         ldata_all.addColumn('number', 'Invalid AS');
         ldata_all.addColumn('number', 'Not Found');
-        ldata_all.addRows({{ stats.stats_all|tojson }});
+        ldata_all_json = {{ stats.stats_all|tojson }}
+        $.each(ldata_all_json, function(i,row) {
+            ldata_all.addRow([
+                (new Date(row.timestamp)),
+                parseInt(row.num_valid),
+                parseInt(row.num_invalid_len),
+                parseInt(row.num_invalid_as),
+                parseInt(row.num_notfound)
+            ]);
+        });
+
         var ldata_roa = new google.visualization.DataTable();
         ldata_roa.addColumn('datetime', 'Timestamp');
         ldata_roa.addColumn('number', 'Valid');
         ldata_roa.addColumn('number', 'Invalid Length');
         ldata_roa.addColumn('number', 'Invalid AS');
-        ldata_all.addRows({{ stats.stats_roa|tojson }});
+        ldata_roa_json = {{ stats.stats_roa|tojson }}
+        $.each(ldata_roa_json, function(i,row) {
+            ldata_roa.addRow([
+                (new Date(row.timestamp)),
+                parseInt(row.num_valid),
+                parseInt(row.num_invalid_len),
+                parseInt(row.num_invalid_as)
+            ]);
+        });
 
         var popts_all = {
             title: 'Overall Validation Results',
