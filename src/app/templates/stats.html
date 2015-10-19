@@ -40,7 +40,8 @@
                 2: { color: '#e31a1c' },
                 3: { color: '#888888' }
             },
-
+            legend:{position: 'top'},
+            chartArea:{left:'10%',top:'10%',width:'85%',height:'70%'}
         };
         var lopts_roa = {
             series: {
@@ -48,6 +49,8 @@
                 1: { color: '#ff7f00' },
                 2: { color: '#e31a1c' }
             },
+            legend:{position: 'top'},
+            chartArea:{left:'10%',top:'10%',width:'85%',height:'70%'}
         };
 
         var pchart_all = new google.visualization.PieChart(document.getElementById('piechart_all'));
