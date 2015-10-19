@@ -31,7 +31,7 @@ def output_stat(dbconnstr, interval):
             logging.exception ("QUERY failed with: " + e.message)
         else:
             if stats['ts'] != 'now':
-                db.stats.insert_one(stats)
+                db.validity_stats.insert_one(stats)
         time.sleep(interval)
 
 def output_data(dbconnstr, queue, dropdata, keepdata):
