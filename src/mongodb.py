@@ -1,6 +1,7 @@
 import logging
 import time
 
+from datetime import datetime
 from pymongo import MongoClient
 
 def output_stat(dbconnstr, interval):
