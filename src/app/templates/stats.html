@@ -35,6 +35,25 @@
         };
         var chart_val = new google.visualization.PieChart(document.getElementById('piechart_val'));
         chart_val.draw(data_val, options_val);
+
+        var ldata_all = google.visualization.arrayToDataTable({{ stats.stats_all|tojson }});
+        var ldata_roa = google.visualization.arrayToDataTable({{ stats.stats_roa|tojson }});
+
+        var lopts_all = {
+            title: 'Statistics over time'
+            curveType: 'function',
+            legend: {position: 'bottom'}
+
+        };
+
+        var lopts_roa = {};
+
+        var lchart_all = new google.visualization.LineChart(document.getElementById('linechart_all'));
+        var lchart_roa = new google.visualization.LineChart(document.getElementById('linechart_roa'));
+
+        lchart_all.draw(ldata_all, lopts_all);
+        lchart_roa.draw(ldata_roa, lopts_roa);
+
       }
     </script>
 {% endblock %}
@@ -77,6 +96,7 @@
                     <p></p>
                 </div>
                 <div id="piechart_all"></div>
+                <div id="linechart_all"></div>
             </div></div>
             <div class="col-md-6 col-xs-12"><div class="panel panel-default">
                 <div class="panel-heading">
@@ -87,6 +107,7 @@
                     <p></p>
                 </div>
                 <div id="piechart_val"></div>
+                <div id="linechart_val"></div>
             </div></div>
         </div>
 {% endblock %}
