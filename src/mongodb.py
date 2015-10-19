@@ -9,7 +9,7 @@ def output_stat(dbconnstr, interval):
         logging.warning("invalid interval for output_stat, reset to 60s!")
         interval = 60
 
-    client = pymongo.MongoClient(dbconnstr)
+    client = MongoClient(dbconnstr)
     db = client.get_default_database()
 
     while True:

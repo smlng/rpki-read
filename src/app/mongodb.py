@@ -1,10 +1,10 @@
 import logging
-import pymongo
 
 from datetime import datetime
+from pymongo import MongoClient
 
 def get_validation_stats(dbconnstr):
-    client = pymongo.MongoClient(dbconnstr)
+    client = MongoClient(dbconnstr)
     db = client.get_default_database()
 
     stats = dict()
@@ -29,7 +29,7 @@ def get_validation_stats(dbconnstr):
     return stats
 
 def get_list(dbconnstr, state):
-    client = pymongo.MongoClient(dbconnstr)
+    client = MongoClient(dbconnstr)
     db = client.get_default_database()
     rlist = []
 
