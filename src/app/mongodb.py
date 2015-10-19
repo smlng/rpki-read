@@ -13,8 +13,8 @@ def get_validation_stats(dbconnstr):
     stats['num_invalid_as'] = 0
     stats['num_invalid_len'] = 0
     stats['num_not_found'] = 0
-    stats['stats_all'] = [['Timestamp', 'Valid', 'InvalidAS','InvalidLength', 'NotFound']]
-    stats['stats_roa'] = [['Timestamp', 'Valid', 'InvalidAS','InvalidLength']]
+    stats['stats_all'] = [['Timestamp', 'Valid', 'Invalid Length','Invalid AS', 'Not Found']]
+    stats['stats_roa'] = [['Timestamp', 'Valid', 'Invalid Length','Invalid AS']]
     try:
         stats['num_valid'] = db.validity.find({'validated_route.validity.state' : 'Valid' }).count()
         stats['num_invalid_as'] = db.validity.find({'validated_route.validity.state' : 'InvalidAS' }).count()
