@@ -8,7 +8,8 @@
       function drawChart() {
 
         var pdata_all = google.visualization.arrayToDataTable({{ stats.table_all|tojson }});
-        var pdata_roa = google.visualization.arrayToDataTable({{ stats.table_roa|tojson }});
+        var pview_roa = new google.visualization.DataView(pdata_all);
+        pview_roa.hideRows([3]); // skip row with NotFound
 
         var ldata_all = new google.visualization.DataTable();
         ldata_all.addColumn('datetime', 'Timestamp');
@@ -27,20 +28,8 @@
             ]);
         });
 
-        var ldata_roa = new google.visualization.DataTable();
-        ldata_roa.addColumn('datetime', 'Timestamp');
-        ldata_roa.addColumn('number', 'Valid');
-        ldata_roa.addColumn('number', 'Invalid Length');
-        ldata_roa.addColumn('number', 'Invalid AS');
-        ldata_roa_json = {{ stats.stats_roa|tojson }}
-        $.each(ldata_roa_json, function(i,row) {
-            ldata_roa.addRow([
-                (new Date(row.ts*1000)),
-                parseInt(row.num_valid),
-                parseInt(row.num_invalid_len),
-                parseInt(row.num_invalid_as)
-            ]);
-        });
+        var lview_roa = new google.visualization.DataView(ldata_all);
+        lview_roa.setColumns([0,1,2,3]); // skip column with NotFound
 
         var popts_all = {
             legend:{position: 'left'},
@@ -91,9 +80,9 @@
         var lchart_roa = new google.visualization.LineChart(document.getElementById('linechart_roa'));
 
         pchart_all.draw(pdata_all, popts_all);
-        pchart_roa.draw(pdata_roa, popts_roa);
+        pchart_roa.draw(pview_roa, popts_roa);
         lchart_all.draw(ldata_all, lopts_all);
-        lchart_roa.draw(ldata_roa, lopts_roa);
+        lchart_roa.draw(lview_roa, lopts_roa);
 
       }
     </script>

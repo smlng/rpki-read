@@ -21,7 +21,6 @@ def get_validation_stats(dbconnstr):
         stats['num_invalid_len'] = db.validity.find({'validated_route.validity.state' : 'InvalidLength' }).count()
         stats['num_not_found'] = db.validity.find({'validated_route.validity.state' : 'NotFound' }).count()
         stats['stats_all'] = list(db.validity_stats.find({},{'_id':0}).sort('timestamp', DESCENDING).limit(1440))
-        stats['stats_roa'] = list(db.validity_stats.find({},{'_id':0, 'num_not_found':0}).sort('timestamp', DESCENDING).limit(1440))
         ts_tmp = db.validity.find_one(projection={'timestamp': True, '_id': False}, sort=[('timestamp', -1)])['timestamp']
         stats['latest_ts'] = datetime.fromtimestamp(int(ts_tmp)).strftime('%Y-%m-%d %H:%M:%S')
     except Exception, e:
