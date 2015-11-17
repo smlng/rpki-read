@@ -2,6 +2,7 @@ import logging
 import time
 
 from datetime import datetime
+from math import sqrt
 from pymongo import MongoClient
 
 MAX_BULK_OPS = 128
