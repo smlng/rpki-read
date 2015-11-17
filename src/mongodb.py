@@ -5,7 +5,7 @@ from datetime import datetime
 from math import sqrt
 from pymongo import MongoClient
 
-MAX_BULK_OPS = 128
+MAX_BULK_OPS = 192
 
 def output_stat(dbconnstr, interval):
     logging.debug ("CALL output_stat mongodb, with" +dbconnstr)
@@ -83,6 +83,8 @@ def output_data(dbconnstr, queue, dropdata, keepdata):
                 abulk.insert(adata)
             except Exception, e:
                 logging.exception ("archive entry, failed with: %s ", e.message)
+            else:
+                bulk_len += 1
         # end keepdata
 
         # exec bulk validity
