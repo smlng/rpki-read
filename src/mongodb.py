@@ -85,7 +85,7 @@ def output_data(dbconnstr, queue, dropdata, keepdata):
         # end keepdata
 
         # exec bulk validity
-        if bulk_len > max(int(queue.qsize()/16),MAX_BULK_OPS):
+        if bulk_len > max(int(sqrt(queue.qsize())),MAX_BULK_OPS):
             try:
                 vbulk.execute()
                 if keepdata:
