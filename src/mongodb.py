@@ -5,7 +5,7 @@ from datetime import datetime
 from math import sqrt
 from pymongo import MongoClient
 
-MAX_BULK_OPS = 192
+MAX_BULK_OPS = 987
 
 def output_stat(dbconnstr, interval):
     logging.debug ("CALL output_stat mongodb, with" +dbconnstr)
@@ -15,7 +15,6 @@ def output_stat(dbconnstr, interval):
 
     client = MongoClient(dbconnstr)
     db = client.get_default_database()
-
     while True:
         stats = dict()
         stats['ts'] = 'now'
@@ -48,6 +47,7 @@ def output_data(dbconnstr, queue, dropdata, keepdata):
     vbulk = db.validity.initialize_ordered_bulk_op()
     abulk = db.archive.initialize_ordered_bulk_op()
     bulk_len = 0
+    begin = datetime.now()
     while True:
         data = queue.get()
         if (data == 'DONE'):
@@ -87,8 +87,10 @@ def output_data(dbconnstr, queue, dropdata, keepdata):
                 bulk_len += 1
         # end keepdata
 
+        now = datetime.now()
+        timeout = begin - now
         # exec bulk validity
-        if bulk_len > max(int(sqrt(queue.qsize())),MAX_BULK_OPS):
+        if (bulk_len > MAX_BULK_OPS) or (timeout.seconds > max_timeout):
             try:
                 vbulk.execute()
                 if keepdata:
@@ -100,3 +102,4 @@ def output_data(dbconnstr, queue, dropdata, keepdata):
                 bulk_len = 0
                 if keepdata:
                     abulk = db.archive.initialize_ordered_bulk_op()
+            begin = datetime.now()
