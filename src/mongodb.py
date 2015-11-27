@@ -1,7 +1,7 @@
 import logging
 import time
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from math import sqrt
 from pymongo import MongoClient
 from settings import max_timeout
@@ -88,9 +88,10 @@ def output_data(dbconnstr, queue, dropdata, keepdata):
         # end keepdata
 
         now = datetime.now()
-        timeout = begin - now
+        timeout = now - begin
         # exec bulk validity
-        if (bulk_len > MAX_BULK_OPS) or (timeout.seconds > max_timeout):
+        if (bulk_len > MAX_BULK_OPS) or (timeout.total_seconds() > max_timeout):
+            begin = datetime.now()
             logging.info ("do mongo bulk operation ...")
             try:
                 vbulk.execute()
@@ -103,4 +104,3 @@ def output_data(dbconnstr, queue, dropdata, keepdata):
                 bulk_len = 0
                 if keepdata:
                     abulk = db.archive.initialize_ordered_bulk_op()
-            begin = datetime.now()
