@@ -91,6 +91,7 @@ def output_data(dbconnstr, queue, dropdata, keepdata):
         timeout = begin - now
         # exec bulk validity
         if (bulk_len > MAX_BULK_OPS) or (timeout.seconds > max_timeout):
+            logging.info ("do mongo bulk operation ...")
             try:
                 vbulk.execute()
                 if keepdata:
