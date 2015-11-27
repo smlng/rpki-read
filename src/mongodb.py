@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 from math import sqrt
 from pymongo import MongoClient
-
+from settings import max_timeout
 MAX_BULK_OPS = 987
 
 def output_stat(dbconnstr, interval):
