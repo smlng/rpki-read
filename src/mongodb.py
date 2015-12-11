@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from math import sqrt
 from pymongo import MongoClient
 from settings import max_timeout
-MAX_BULK_OPS = 987
+MAX_BULK_OPS = 10000
 
 def output_stat(dbconnstr, interval):
     logging.debug ("CALL output_stat mongodb, with" +dbconnstr)
@@ -96,9 +96,9 @@ def output_data(dbconnstr, queue, dropdata, keepdata):
             begin = datetime.now()
             logging.info ("do mongo bulk operation ...")
             try:
-                vbulk.execute()
+                vbulk.execute({'w': 0})
                 if keepdata:
-                    abulk.execute()
+                    abulk.execute({'w': 0})
             except Exception, e:
                 logging.exception ("bulk operation, failed with: %s" , e.message)
             finally:
