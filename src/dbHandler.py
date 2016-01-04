@@ -51,7 +51,7 @@ def main():
     dbconnstr = None
     # BEGIN
     logging.info("START")
-    elif args['mongodb']:
+    if args['mongodb']:
         logging.info("database: MongoDB")
         from mongodb import output_data, output_stat
         dbconnstr = args['mongodb'].strip()
