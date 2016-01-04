@@ -76,7 +76,10 @@ def output_data(dbconnstr, queue, dropdata, keepdata):
             continue
 
         # archive data?
-        if (keepdata) and (data['validated_route']['validity']['state'] != 'NotFound'):
+        if  (keepdata) and
+            (data['type'] == 'announcement') and
+            ('validated_route' in data.keys()) and
+            (data['validated_route']['validity']['state'] != 'NotFound'):
             adata = data.copy()
             adata['archive'] = True
             logging.debug("keepdata, insert " +adata['type']+ " for prefix: " +adata['prefix'])
