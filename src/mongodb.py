@@ -76,9 +76,9 @@ def output_data(dbconnstr, queue, dropdata, keepdata):
             continue
 
         # archive data?
-        if  (keepdata) and
-            (data['type'] == 'announcement') and
-            ('validated_route' in data.keys()) and
+        if  (keepdata) and \
+            (data['type'] == 'announcement') and \
+            ('validated_route' in data.keys()) and \
             (data['validated_route']['validity']['state'] != 'NotFound'):
             adata = data.copy()
             adata['archive'] = True
