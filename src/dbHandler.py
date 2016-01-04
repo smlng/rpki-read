@@ -32,9 +32,6 @@ def main():
                         help='Set timeout interval for stats, default: 60s.',
                         type=int, default=60)
     db = parser.add_mutually_exclusive_group(required=True)
-    db.add_argument(    '-c', '--couchdb',
-                        help='CouchDB connection parameters.',
-                        default=False)
     db.add_argument(    '-m', '--mongodb',
                         help='MongoDB connection parameters.',
                         default=False)
@@ -54,9 +51,6 @@ def main():
     dbconnstr = None
     # BEGIN
     logging.info("START")
-    if args['couchdb']:
-        logging.warning ("Support for CouchDB not implemented yet!")
-        sys.exit(1)
     elif args['mongodb']:
         logging.info("database: MongoDB")
         from mongodb import output_data, output_stat
