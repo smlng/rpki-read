@@ -4,7 +4,7 @@ import time
 from bson.son import SON
 from datetime import datetime, timedelta
 from math import sqrt
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING, ASCENDING
 from settings import MAX_TIMEOUT, MAX_BULK_OPS, MAX_PURGE_ITEMS
 
 def output_stat(dbconnstr, interval):
@@ -28,7 +28,7 @@ def output_stat(dbconnstr, interval):
         try:
             if "validity" in db.collection_names() and db.validity.count() > 0:
                 pipeline = [
-                    { "$sort": SON( [ ( "prefix", 1), ("timestamp", -1 ) ] ) },
+                    { "$sort": SON( [ ( "prefix", ASCENDING), ("timestamp", DESCENDING ) ] ) },
                     { "$group": {   "_id": "$prefix",
                                     "timestamp": { "$first": "$timestamp" },
                                     "validity": { "$first": "$validated_route.validity.state"},
