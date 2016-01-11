@@ -5,15 +5,11 @@ from bson.son import SON
 from datetime import datetime, timedelta
 from math import sqrt
 from pymongo import MongoClient, DESCENDING, ASCENDING
-from settings import MAX_TIMEOUT, MAX_BULK_OPS, MAX_PURGE_ITEMS
+from settings import BULK_TIMEOUT, BULK_MAX_OPS
 
 def output_stat(dbconnstr, interval):
     """Generate and store validation statistics in database"""
-    logging.debug ("CALL output_stat mongodb, with" +dbconnstr)
-    # simple check if interval is valid, that is non-negative
-    if interval < 1:
-        logging.warning("invalid interval for output_stat, reset to 60s!")
-        interval = 60
+    logging.debug ("CALL output_stat, with mongodb: " +dbconnstr)
     # open db connection
     client = MongoClient(dbconnstr)
     db = client.get_default_database()
@@ -48,18 +44,6 @@ def output_stat(dbconnstr, interval):
         else:
             if stats['ts'] != 'now':
                 db.validity_stats.insert_one(stats)
-        # purge old NotFound entries
-        pipeline = [
-            { "$group": { "_id": '$prefix', "plist": { "$push" : { "pid": "$_id", "timestamp": "$timestamp", "type": "$type", "validity": "$validated_route.validity.state" } }, "maxts": {"$max" : '$timestamp'} } },
-            { "$unwind": "$plist" },
-            { "$match": {'plist.validity' : "NotFound"} },
-            { "$project": {"toDelete": { "$cond": [ { "$lt": [ "$plist.timestamp", "$maxts" ] }, "true", "false" ] }, "_id" : '$plist.pid', 'maxts': '$maxts', 'timestamp': '$plist.timestamp'} },
-            { "$match": {'toDelete': "true"} },
-            { "$limit": MAX_PURGE_ITEMS}
-        ]
-        purge = db.validity.aggregate(pipeline)
-        for p in purge:
-            db.validity.remove({"_id": p['_id']})
         time.sleep(interval)
 
 def output_data(dbconnstr, queue, dropdata):
@@ -93,7 +77,7 @@ def output_data(dbconnstr, queue, dropdata):
         now = datetime.now()
         timeout = now - begin
         # exec bulk validity
-        if (bulk_len > MAX_BULK_OPS) or (timeout.total_seconds() > MAX_TIMEOUT):
+        if (bulk_len > BULK_MAX_OPS) or (timeout.total_seconds() > BULK_TIMEOUT):
             begin = datetime.now()
             logging.info ("do mongo bulk operation ...")
             try:
