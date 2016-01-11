@@ -12,17 +12,22 @@ def purge_notfound(dbconnstr, interval):
     db = client.get_default_database()
     while(true):
         # purge old NotFound entries
-        pipeline = [
-            { "$group": { "_id": '$prefix', "plist": { "$push" : { "pid": "$_id", "timestamp": "$timestamp", "type": "$type", "validity": "$validated_route.validity.state" } }, "maxts": {"$max" : '$timestamp'} } },
-            { "$unwind": "$plist" },
-            { "$match": {'plist.validity' : "NotFound"} },
-            { "$project": {"toDelete": { "$cond": [ { "$lt": [ "$plist.timestamp", "$maxts" ] }, "true", "false" ] }, "_id" : '$plist.pid', 'maxts': '$maxts', 'timestamp': '$plist.timestamp'} },
-            { "$match": {'toDelete': "true"} },
-            { "$limit": PURGE_MAX_ITEMS}
-        ]
-        purge = db.validity.aggregate(pipeline)
-        for p in purge:
-            db.validity.remove({"_id": p['_id']})
+        if "validity" in db.collection_names() and db.validity.count() > 0:
+            try:
+                pipeline = [
+                    { "$group": { "_id": '$prefix', "plist": { "$push" : { "pid": "$_id", "timestamp": "$timestamp", "type": "$type", "validity": "$validated_route.validity.state" } }, "maxts": {"$max" : '$timestamp'} } },
+                    { "$unwind": "$plist" },
+                    { "$match": {'plist.validity' : "NotFound"} },
+                    { "$project": {"toDelete": { "$cond": [ { "$lt": [ "$plist.timestamp", "$maxts" ] }, "true", "false" ] }, "_id" : '$plist.pid', 'maxts': '$maxts', 'timestamp': '$plist.timestamp'} },
+                    { "$match": {'toDelete': "true"} },
+                    { "$limit": PURGE_MAX_ITEMS}
+                ]
+                purge = db.validity.aggregate(pipeline)
+                for p in purge:
+                    db.validity.remove({"_id": p['_id']})
+            except Exception, e:
+                logging.exception ("REMOVE failed with: " + e.message)
+
         time.sleep(interval)
 
 def main():

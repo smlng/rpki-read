@@ -21,8 +21,8 @@ def output_stat(dbconnstr, interval):
         stats['num_InvalidAS'] = 0
         stats['num_InvalidLength'] = 0
         stats['num_NotFound'] = 0
-        try:
-            if "validity" in db.collection_names() and db.validity.count() > 0:
+        if "validity" in db.collection_names() and db.validity.count() > 0:
+            try:
                 pipeline = [
                     { "$sort": SON( [ ( "prefix", ASCENDING), ("timestamp", DESCENDING ) ] ) },
                     { "$group": {   "_id": "$prefix",
@@ -39,11 +39,11 @@ def output_stat(dbconnstr, interval):
                     stats["num_"+results[i]['_id']] = results[i]['count']
                 ts_tmp = db.validity.find_one(projection={'timestamp': True, '_id': False}, sort=[('timestamp', -1)])['timestamp']
                 stats['ts'] = int(ts_tmp)
-        except Exception, e:
-            logging.exception ("QUERY failed with: " + e.message)
-        else:
-            if stats['ts'] != 'now':
-                db.validity_stats.insert_one(stats)
+                if stats['ts'] != 'now':
+                    db.validity_stats.insert_one(stats)
+            except Exception, e:
+                logging.exception ("QUERY failed with: " + e.message)
+
         time.sleep(interval)
 
 def output_data(dbconnstr, queue, dropdata):
