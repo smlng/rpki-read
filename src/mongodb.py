@@ -40,7 +40,7 @@ def output_latest(dbconnstr):
                 "}")
     last_validity_count = 0
     while True:
-        if "validity" in db.collection_names() and db.validity.count() > last_validity_count:
+        if "validity" in db.collection_names() and db.validity.count() != last_validity_count:
             try:
                 db.validity.map_reduce( f_map,
                                         f_reduce,

@@ -47,10 +47,10 @@ def about():
     content = Markup(markdown.markdown(md_text))
     return render_template("about.html", content=content)
 
-## stats handler
+## dashboard handler
 @app.route('/')
-@app.route('/stats')
-def stats():
+@app.route('/dashboard')
+def dashboard():
     #stats = get_validation_stats(config.DATABASE_CONN)
     l_stats = g_stats.copy()
     table = [['Validity', 'Count']]
@@ -62,7 +62,7 @@ def stats():
     table_all.append([ 'Not Found', l_stats['num_NotFound'] ])
     l_stats['table_all'] = table_all
     l_stats['source'] = config.BGPMON_SOURCE
-    return render_template("stats.html", stats=l_stats)
+    return render_template("dashboard.html", stats=l_stats)
 
 ## table handler
 @app.route('/valid')
