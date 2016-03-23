@@ -15,9 +15,7 @@ from datetime import datetime
 from subprocess import PIPE, Popen
 
 # internal imports
-from mongodb import output_data, output_stat, output_latest
-from purgeNotFound import purge_notfound
-from archiveNotFound import archive_notfound
+from mongodb import output_data, output_stat, output_latest, archive_or_purge, archive_clean
 from settings import *
 
 def main():
@@ -32,7 +30,7 @@ def main():
                         help='MongoDB connection parameters.',
                         type=str, required=True)
     parser.add_argument('-p', '--purge',
-                        help='Purge expired NotFound validation results (Default: archive).',
+                        help='Purge expired validation results (Default: archive).',
                         action='store_true', default=False)
 
     args = vars(parser.parse_args())
@@ -71,21 +69,14 @@ def main():
     archive_interval = SERVICE_INTERVAL
     if archive_interval < 1:
         archive_interval = 300
-    archive_p = mp.Process( target=archive_notfound,
-                            args=(dbconnstr,archive_interval))
+    archive_p = mp.Process( target=archive_or_purge,
+                            args=(dbconnstr, archive_interval, args['purge']))
     archive_p.start()
 
-    # thread5: purge old validation results with NotFound from archive
-    # NOTE: if enable, you cannot recover all historic validation states
-    # on the other hand you will save _a lot of_ memory
-    if args['purge']:
-        purge_interval = SERVICE_INTERVAL
-        if purge_interval < 1:
-            purge_interval = 300
-        purge_p = mp.Process(   target=purge_notfound,
-                                args=(dbconnstr,purge_interval))
-        purge_p.start()
-
+    if not args['purge']:
+        cleanup_p = mp.Process( target=archive_clean,
+                                args=(dbconnstr, archive_interval))
+        cleanup_p.start()
 
     # main loop, read data from STDIN to be stored in database
     counter = 0
