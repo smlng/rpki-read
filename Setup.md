@@ -119,4 +119,4 @@ bgp peers, but luckily we provide a patch for that. Apply the patch as follows:
     $ make
     $ sudo make install
 
-Ein Beispiel-Konfiguration für BGPmon findet sich in [bgpmon_config.txt](src/bgpmon/bgpmon_config.txt).
+A configuration example for BGPmon is provided in [bgpmon_config.txt](src/bgpmon/bgpmon_config.txt).
