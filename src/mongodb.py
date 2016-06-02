@@ -139,12 +139,12 @@ def archive_or_purge(dbconnstr, interval, purge):
         if len(archive_old) < 1:
             archive_old = archive_str
         archive_col = db[archive_str]
-        if not purge:
-            bulkInsert = archive_col.initialize_unordered_bulk_op()
-        bulkRemove = validity.initialize_unordered_bulk_op()
         counter = 0
         # archive old NotFound entries
         if "validity" in db.collection_names() and db.validity.count() > 0:
+            if not purge:
+                bulkInsert = archive_col.initialize_unordered_bulk_op()
+            bulkRemove = db.validity.initialize_unordered_bulk_op()
             try:
                 pipeline = [
                     { "$group": { "_id": '$prefix', "plist": { "$push" : { "pid": "$_id", "timestamp": "$timestamp" } }, "maxts": {"$max" : '$timestamp'} } },
