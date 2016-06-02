@@ -132,10 +132,16 @@ def archive_or_purge(dbconnstr, interval, purge):
     # open db connection
     client = MongoClient(dbconnstr)
     db = client.get_default_database()
+    archive_old = ""
     while(True):
+        now = datetime.now()
+        archive_str = 'archive_'+now.year+"_"+now.month
+        if len(archive_old) < 1:
+            archive_old = archive_str
+        archive_col = db[archive_str]
         if not purge:
-            bulkInsert = db.archive.initialize_unordered_bulk_op()
-        bulkRemove = db.validity.initialize_unordered_bulk_op()
+            bulkInsert = archive.initialize_unordered_bulk_op()
+        bulkRemove = validity.initialize_unordered_bulk_op()
         counter = 0
         # archive old NotFound entries
         if "validity" in db.collection_names() and db.validity.count() > 0:
@@ -159,26 +165,29 @@ def archive_or_purge(dbconnstr, interval, purge):
                         bulkInsert.execute()
             except Exception, e:
                 logging.exception ("archive_or_purge failed with: " + e.message)
+        if archive_old != archive_str:
+            archive_clean(dbconnstr, archive_old)
         if counter < (BULK_MAX_OPS * 0.8):
             time.sleep(interval)
 
-def archive_clean(dbconnstr, interval):
-    logging.info ("CALL archive_clean, with mongodb: " +dbconnstr)
+def archive_clean(dbconnstr, archive_str):
+    logging.info ("CALL archive_clean on "+archive_str+", with mongodb: " +dbconnstr)
     client = MongoClient(dbconnstr)
     db = client.get_default_database()
     while(True):
-        if "archive" in db.collection_names() and db.archive.count() > 0:
+        if archive_str in db.collection_names() and db[archive_str].count() > 0:
+            archive = db['archive_str']
             try:
-                prefixes = db.archive.distinct('prefix')
+                prefixes = archive.distinct('prefix')
             except Exception, e:
                 logging.exception ("archive_clean, distinct failed with: " + e.message)
             else:
 
                 for p in prefixes:
                     counter = 0
-                    bulkRemove = db.archive.initialize_unordered_bulk_op()
+                    bulkRemove = archive.initialize_unordered_bulk_op()
                     try:
-                        states = db.archive.find({"prefix": p}, sort=[('timestamp', ASCENDING)])
+                        states = archive.find({"prefix": p}, sort=[('timestamp', ASCENDING)])
                     except Exception, e:
                         logging.exception ("archive_clean, find failed with: " + e.message)
                     else:
