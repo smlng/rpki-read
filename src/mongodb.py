@@ -140,7 +140,7 @@ def archive_or_purge(dbconnstr, interval, purge):
             archive_old = archive_str
         archive_col = db[archive_str]
         if not purge:
-            bulkInsert = archive.initialize_unordered_bulk_op()
+            bulkInsert = archive_col.initialize_unordered_bulk_op()
         bulkRemove = validity.initialize_unordered_bulk_op()
         counter = 0
         # archive old NotFound entries
@@ -176,18 +176,18 @@ def archive_clean(dbconnstr, archive_str):
     db = client.get_default_database()
     while(True):
         if archive_str in db.collection_names() and db[archive_str].count() > 0:
-            archive = db['archive_str']
+            archive_col = db['archive_str']
             try:
-                prefixes = archive.distinct('prefix')
+                prefixes = archarchive_colive.distinct('prefix')
             except Exception, e:
                 logging.exception ("archive_clean, distinct failed with: " + e.message)
             else:
 
                 for p in prefixes:
                     counter = 0
-                    bulkRemove = archive.initialize_unordered_bulk_op()
+                    bulkRemove = archive_col.initialize_unordered_bulk_op()
                     try:
-                        states = archive.find({"prefix": p}, sort=[('timestamp', ASCENDING)])
+                        states = archive_col.find({"prefix": p}, sort=[('timestamp', ASCENDING)])
                     except Exception, e:
                         logging.exception ("archive_clean, find failed with: " + e.message)
                     else:
