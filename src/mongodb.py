@@ -134,8 +134,7 @@ def archive_or_purge(dbconnstr, interval, purge):
     db = client.get_default_database()
     archive_old = ""
     while(True):
-        now = datetime.now()
-        archive_str = 'archive_'+str(now.year)+"_"+str(now.month)
+        archive_str = datetime.today().strftime("archive_%Y_w%W")
         if len(archive_old) < 1:
             archive_old = archive_str
         archive_col = db[archive_str]
