@@ -97,7 +97,8 @@ def main():
     logging.basicConfig(level=numeric_level,
                         format='%(asctime)s : %(levelname)s : %(message)s')
 
-    ts_begin = datetime.now().total_seconds()
+    ts_begin = int((datetime.now() - datetime(1970, 1, 1)).total_seconds())
+    datetime.now().total_seconds()
     if args['begin']:
         ts_begin = int((args['begin'] - datetime(1970, 1, 1)).total_seconds())
     ts_until = 0
