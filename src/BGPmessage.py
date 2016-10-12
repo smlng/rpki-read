@@ -7,8 +7,8 @@ class BGPmessage:
         self.timestamp = ts
         self.type = type
         self.aspath = []
-        self.announce = set()
-        self.withdraw = set()
+        self.announce = []
+        self.withdraw = []
 
     def set_source(self, src):
         self.source = src
@@ -20,7 +20,9 @@ class BGPmessage:
         self.aspath.append(asn)
 
     def add_announce(self, prefix):
-        self.announce.add(prefix)
+        if prefix not in self.announce:
+            self.announce.append(prefix)
 
     def add_withdraw(self, prefix):
-        self.withdraw.add(prefix)
+        if prefix not in self.withdraw:
+            self.withdraw.append(prefix)

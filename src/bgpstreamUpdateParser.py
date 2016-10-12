@@ -75,7 +75,7 @@ def recv_bgpstream_rib(begin, until, collector, output_queue):
         src_asn = None
         while (elem):
             if ((next_hop != elem.fields['next-hop']) or (ts != elem.time) or
-                (src_addr != elem.peer_address) or (src_asn !) elem.peer_asn) or
+                (src_addr != elem.peer_address) or (src_asn != elem.peer_asn) or
                 (aspath != elem.fields['as-path']) or not bgp_message):
                 if bgp_message: # output previous data
                     output_queue.put(bgp_message)
@@ -86,7 +86,6 @@ def recv_bgpstream_rib(begin, until, collector, output_queue):
                 src_peer = dict()
                 src_addr = elem.peer_address
                 src_asn = elem.peer_asn
-                logging.info("SRC ("+src_addr+","+src_asn+")")
                 src_peer['addr'] = src_addr
                 src_peer['port'] = 0
                 src_peer['asn'] = src_asn
