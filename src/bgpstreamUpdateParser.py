@@ -67,30 +67,49 @@ def recv_bgpstream_rib(begin, until, collector, output_queue):
         elif (rec.time > (rib_ts + RIB_TS_INTERVAL)):
             logging.info("received full RIB table dump.")
             break
+        bgp_message = None
+        next_hop = None
+        ts = None
+        aspath = None
+        src_addr = None
+        src_asn = None
         while (elem):
-            bgp_message = BGPmessage(elem.time,'update')
+            if (next_hop != elem.fields['next-hop']) or (ts != elem.time) or
+               (src_addr != elem.peer_address) or (src_asn !) elem.peer_asn) or
+               (aspath != elem.fields['as-path']) or not bgp_message:
+                if bgp_message: # output previous data
+                    output_queue.put(bgp_message)
+                ts = elem.time
+                bgp_message = BGPmessage(ts, 'update')
+                next_hop = elem.fields['next-hop']
+                bgp_message.set_nexthop(next_hop)
+                src_peer = dict()
+                src_addr = elem.peer_addr
+                src_asn = elem.peer_asn
+                src_peer['addr'] = src_addr
+                src_peer['port'] = 0
+                src_peer['asn'] = src_asn
+                bgp_message.set_source(src_peer)
+                aspath = elem.fields['as-path'].split()
+                for a in aspath:
+                    if not '{' in a: # ignore AS-SETs
+                        bgp_message.add_as_to_path(a)
             bgp_message.add_announce(elem.fields['prefix'])
-            bgp_message.set_nexthop(elem.fields['next-hop'])
-            aspath = elem.fields['as-path'].split()
-            for a in aspath:
-                if not '{' in a: # ignore AS-SETs
-                    bgp_message.add_as_to_path(a)
-            output_queue.put(bgp_message)
+
 
 def recv_bgpstream_updates(begin, until, collector, output_queue):
     logging.info ("CALL recv_bgpstream_updates")
+    # wait for first RIB table dump to complete
+    while (rib_ts < 0):
+        time.sleep(RIB_TS_INTERVAL/10)
+    time.sleep(RIB_TS_INTERVAL)
     # Create bgpstream
     stream = BGPStream()
     rec = BGPRecord()
     # set filtering
     stream.add_filter('collector', collector)
     stream.add_filter('record-type','updates')
-    stream.add_interval_filter(begin,until)
-
-    # wait for first RIB table dump to complete
-    while (rib_ts < 0):
-        time.sleep(RIB_TS_INTERVAL/10)
-    time.sleep(RIB_TS_INTERVAL)
+    stream.add_interval_filter(rib_ts,until)
     # Start the stream
     stream.start()
     while (stream.get_next_record(rec)):
@@ -147,11 +166,11 @@ def main():
     dt_begin = tz.localize(datetime.today())
     if args['begin']:
         dt_begin = tz.localize(args['begin'])
-    ts_begin = int(dt_begin - dt_epoch).total_seconds())
+    ts_begin = int((dt_begin - dt_epoch).total_seconds())
     ts_until = 0
     if args['until']:
         dt_until = tz.localize(args['until'])
-        ts_until = int(dt_until - dt_epoch).total_seconds())
+        ts_until = int((dt_until - dt_epoch).total_seconds())
 
     # init threads
     output_queue = mp.Queue()
