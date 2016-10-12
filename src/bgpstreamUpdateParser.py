@@ -67,28 +67,24 @@ def recv_bgpstream_rib(begin, until, collector, output_queue):
         elif (rec.time > (rib_ts + RIB_TS_INTERVAL)):
             logging.info("received full RIB table dump.")
             break
+        src_peer = dict()
+        src_peer['addr'] = rec.peer_addr
+        src_peer['port'] = 0
+        src_peer['asn'] = rec.peer_asn
+        logging.info("SRC ("+rec.peer_addr+","+rec.peer_asn+")")
         bgp_message = None
         next_hop = None
         ts = None
         aspath = None
-        src_addr = None
-        src_asn = None
         while (elem):
-            if (next_hop != elem.fields['next-hop']) or (ts != elem.time) or
-               (src_addr != elem.peer_address) or (src_asn !) elem.peer_asn) or
-               (aspath != elem.fields['as-path']) or not bgp_message:
+            if ((next_hop != elem.fields['next-hop']) or (ts != elem.time) or
+                (aspath != elem.fields['as-path']) or not bgp_message):
                 if bgp_message: # output previous data
                     output_queue.put(bgp_message)
                 ts = elem.time
                 bgp_message = BGPmessage(ts, 'update')
                 next_hop = elem.fields['next-hop']
                 bgp_message.set_nexthop(next_hop)
-                src_peer = dict()
-                src_addr = elem.peer_addr
-                src_asn = elem.peer_asn
-                src_peer['addr'] = src_addr
-                src_peer['port'] = 0
-                src_peer['asn'] = src_asn
                 bgp_message.set_source(src_peer)
                 aspath = elem.fields['as-path'].split()
                 for a in aspath:
