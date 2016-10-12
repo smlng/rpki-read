@@ -149,7 +149,7 @@ def main():
                         type=str, required=True)
     parser.add_argument('-l', '--loglevel',
                         help='Set loglevel [DEBUG,INFO,WARNING,ERROR,CRITICAL].',
-                        type=str, default='ERROR')
+                        type=str, default=DEFAULT_LOG_LEVEL)
     args = vars(parser.parse_args())
 
     numeric_level = getattr(logging, args['loglevel'].upper(), None)
