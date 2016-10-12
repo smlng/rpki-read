@@ -74,27 +74,28 @@ def recv_bgpstream_rib(begin, until, collector, output_queue):
         src_addr = None
         src_asn = None
         while (elem):
-            if ((next_hop != elem.fields['next-hop']) or (ts != elem.time) or
-                (src_addr != elem.peer_address) or (src_asn != elem.peer_asn) or
-                (aspath != elem.fields['as-path'])):
-                if bgp_message: # output previous data
-                    output_queue.put(bgp_message)
-                ts = elem.time
-                bgp_message = BGPmessage(ts, 'update')
-                next_hop = elem.fields['next-hop']
-                bgp_message.set_nexthop(next_hop)
-                src_peer = dict()
-                src_addr = elem.peer_address
-                src_asn = elem.peer_asn
-                src_peer['addr'] = src_addr
-                src_peer['port'] = 0
-                src_peer['asn'] = src_asn
-                bgp_message.set_source(src_peer)
-                aspath = elem.fields['as-path']
-                for a in aspath.split():
-                    if not '{' in a: # ignore AS-SETs
-                        bgp_message.add_as_to_path(a)
-            bgp_message.add_announce(elem.fields['prefix'])
+            if (elem.type.upper() == 'A') or (if elem.type.upper() == 'R'):
+                if ((next_hop != elem.fields['next-hop']) or (ts != elem.time) or
+                    (src_addr != elem.peer_address) or (src_asn != elem.peer_asn) or
+                    (aspath != elem.fields['as-path'])):
+                    if bgp_message: # output previous data
+                        output_queue.put(bgp_message)
+                    ts = elem.time
+                    bgp_message = BGPmessage(ts, 'update')
+                    next_hop = elem.fields['next-hop']
+                    bgp_message.set_nexthop(next_hop)
+                    src_peer = dict()
+                    src_addr = elem.peer_address
+                    src_asn = elem.peer_asn
+                    src_peer['addr'] = src_addr
+                    src_peer['port'] = 0
+                    src_peer['asn'] = src_asn
+                    bgp_message.set_source(src_peer)
+                    aspath = elem.fields['as-path']
+                    for a in aspath.split():
+                        if not '{' in a: # ignore AS-SETs
+                            bgp_message.add_as_to_path(a)
+                bgp_message.add_announce(elem.fields['prefix'])
             elem = rec.get_next_elem()
         # end while (elem)
     # end while (stream...)
