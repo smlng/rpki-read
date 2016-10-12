@@ -55,47 +55,35 @@ def recv_bgpstream_rib(begin, until, collector, output_queue):
 
     # Start the stream
     stream.start()
-    global rib_ts
     while (stream.get_next_record(rec)):
+        global rib_ts
         if rec.status == 'valid':
             elem = rec.get_next_elem()
         else:
             logging.warn("stream record invalid, skipping.")
             continue
-        if rib_ts < 0:
-            rib_ts = rec.time
-        elif (rec.time > (rib_ts + RIB_TS_INTERVAL)):
+        if (rib_ts > 0) and (rec.time > (rib_ts + RIB_TS_INTERVAL)):
             logging.info("received full RIB table dump.")
             break
         bgp_message = None
-        next_hop = None
-        ts = None
-        aspath = None
-        src_addr = None
-        src_asn = None
         while (elem):
-            if (elem.type.upper() == 'A') or (if elem.type.upper() == 'R'):
-                if ((next_hop != elem.fields['next-hop']) or (ts != elem.time) or
-                    (src_addr != elem.peer_address) or (src_asn != elem.peer_asn) or
-                    (aspath != elem.fields['as-path'])):
-                    if bgp_message: # output previous data
-                        output_queue.put(bgp_message)
-                    ts = elem.time
-                    bgp_message = BGPmessage(ts, 'update')
-                    next_hop = elem.fields['next-hop']
-                    bgp_message.set_nexthop(next_hop)
-                    src_peer = dict()
-                    src_addr = elem.peer_address
-                    src_asn = elem.peer_asn
-                    src_peer['addr'] = src_addr
-                    src_peer['port'] = 0
-                    src_peer['asn'] = src_asn
-                    bgp_message.set_source(src_peer)
-                    aspath = elem.fields['as-path']
-                    for a in aspath.split():
-                        if not '{' in a: # ignore AS-SETs
-                            bgp_message.add_as_to_path(a)
+            if (elem.type.upper() == 'A') or (elem.type.upper() == 'R'):
+                rib_ts = elem.time
+                bgp_message = BGPmessage(elem.time, 'update')
+                bgp_message.set_nexthop(elem.fields['next-hop'])
+                src_peer = dict()
+                src_addr = elem.peer_address
+                src_asn = elem.peer_asn
+                src_peer['addr'] = src_addr
+                src_peer['port'] = 0
+                src_peer['asn'] = src_asn
+                bgp_message.set_source(src_peer)
+                aspath = elem.fields['as-path'].split()
+                for a in aspath:
+                    if not '{' in a: # ignore AS-SETs
+                        bgp_message.add_as_to_path(a)
                 bgp_message.add_announce(elem.fields['prefix'])
+                output_queue.put(bgp_message)
             elem = rec.get_next_elem()
         # end while (elem)
     # end while (stream...)
@@ -125,7 +113,14 @@ def recv_bgpstream_updates(begin, until, collector, output_queue):
         logging.info("Record TS: "+str(rec.time))
         while (elem):
             logging.info(" -- Record Element Type: " + elem.type + ", TS: " + str(elem.time))
-            bgp_message = BGPmessage(elem.time,'update')
+            bgp_message = BGPmessage(elem.time, 'update')
+            src_peer = dict()
+            src_addr = elem.peer_address
+            src_asn = elem.peer_asn
+            src_peer['addr'] = src_addr
+            src_peer['port'] = 0
+            src_peer['asn'] = src_asn
+            bgp_message.set_source(src_peer)
             if elem.type.upper() == 'A':
                 bgp_message.add_announce(elem.fields['prefix'])
                 bgp_message.set_nexthop(elem.fields['next-hop'])
