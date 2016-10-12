@@ -146,7 +146,7 @@ def main():
                         type=valid_date, required=False)
     parser.add_argument('-c', '--collector',
                         help='Route collector from RIPE RIS or Route-Views project.',
-                        type=str, required=True)
+                        type=str, default=DEFAULT_BGPSTREAM_COLLECTOR)
     parser.add_argument('-l', '--loglevel',
                         help='Set loglevel [DEBUG,INFO,WARNING,ERROR,CRITICAL].',
                         type=str, default=DEFAULT_LOG_LEVEL)
