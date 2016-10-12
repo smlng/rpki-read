@@ -160,7 +160,7 @@ def main():
     rt = mp.Process(target=recv_bgpstream_rib,
                     args=((ts_begin-7200), ts_until, args['collector'], output_queue))
 
-    logging.info("START")
+    logging.info("START ("+str(ts_begin)+" - "+str(ts_until)+")")
     try:
         ot.start()
         rt.start()
