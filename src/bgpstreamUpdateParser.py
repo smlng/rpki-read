@@ -186,7 +186,8 @@ def main():
         logging.exception ("ABORT")
     finally:
         output_queue.put("STOP")
-
+    # cleanup
+    rt.join()
     ot.join()
     logging.info("FINISH")
     # END
