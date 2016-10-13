@@ -36,7 +36,7 @@ def get_ipversion_stats(dbconnstr):
                             "valitidy": "$value.validated_route.validity.state"
                         }
                     }
-                }
+                },
                 #{ "$unwind": "$origins" },
             } ]
             results = list(db.validity_latest.aggregate(pipeline, allowDiskUse=True))
@@ -45,16 +45,39 @@ def get_ipversion_stats(dbconnstr):
         else:
             for r in results:
                 ip = IPNetwork(r['_id'])
+                b_val = {"Valid": False, "InvalidLength": False, "InvalidAS": False, "NotFound": False}
                 if ip.version == 4:
-                    ipv4_stats['num_ips'] += ip.size
-                    ipv4_stats['len_pfx'].append(ip.prefixlen)
                     for o in r['origins']:
-                        ipv4_stats["num_"+o['validity']] += 1
+                        ipv4_stats["origins_"+o['validity']] += 1
+                        b_val[o['validity']] = True
+                    if b_val['Valid'] == True:
+                        ipv4_stats["ips_Valid"] += ip.size
+                        ipv4_stats["pfx_Valid"].append(ip.prefixlen)
+                    elif b_val['InvalidLength'] == True:
+                        ipv4_stats["ips_InvalidLength"] += ip.size
+                        ipv4_stats["pfx_InvalidLength"].append(ip.prefixlen)
+                    elif b_val['InvalidAS'] == True:
+                        ipv4_stats["ips_InvalidAS"] += ip.size
+                        ipv4_stats["pfx_InvalidAS"].append(ip.prefixlen)
+                    elif b_val['NotFound'] == True:
+                        ipv4_stats["ips_NotFound"] += ip.size
+                        ipv4_stats["pfx_NotFound"].append(ip.prefixlen)
                 elif ip.version == 6:
-                    ipv6_stats['num_ips'] += ip.size
-                    ipv6_stats['len_pfx'].append(ip.prefixlen)
                     for o in r['origins']:
-                        ipv6_stats["num_"+o['validity']] += 1
+                        ipv6_stats["origins_"+o['validity']] += 1
+                        b_val[o['validity']] = True
+                    if b_val['Valid'] == True:
+                        ipv6_stats["ips_Valid"] += ip.size
+                        ipv6_stats["pfx_Valid"].append(ip.prefixlen)
+                    elif b_val['InvalidLength'] == True:
+                        ipv6_stats["ips_InvalidLength"] += ip.size
+                        ipv6_stats["pfx_InvalidLength"].append(ip.prefixlen)
+                    elif b_val['InvalidAS'] == True:
+                        ipv6_stats["ips_InvalidAS"] += ip.size
+                        ipv6_stats["pfx_InvalidAS"].append(ip.prefixlen)
+                    elif b_val['NotFound'] == True:
+                        ipv6_stats["ips_NotFound"] += ip.size
+                        ipv6_stats["pfx_NotFound"].append(ip.prefixlen)
 
     return ipv4_stats, ipv6_stats
 
