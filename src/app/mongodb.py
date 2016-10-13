@@ -50,7 +50,10 @@ def get_ipversion_stats(dbconnstr):
             logging.exception ("QUERY failed with: " + e.message)
         else:
             for r in results:
-                print str(r)
+                if not r['_id']:
+                    logging.debug("emtpy record, skipping")
+                    continue
+                logging.debug(str(r))
                 ip = IPNetwork(r['_id'])
                 b_val = {"Valid": False, "InvalidLength": False, "InvalidAS": False, "NotFound": False}
                 if ip.version == 4:
