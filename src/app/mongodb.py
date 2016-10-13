@@ -32,11 +32,10 @@ def get_ipversion_stats(dbconnstr):
                     "origins": {
                         "$push" : {
                             "asn": "$value.validated_route.route.origin_asn",
-                            "valitidy": "$value.validated_route.validity.state"
+                            "validity": "$value.validated_route.validity.state"
                         }
                     }
                 },
-                #{ "$unwind": "$origins" },
             } ]
             results = list(db.validity_latest.aggregate(pipeline, allowDiskUse=True))
         except Exception, e:
