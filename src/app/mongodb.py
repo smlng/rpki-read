@@ -8,10 +8,23 @@ from netaddr import *
 
 logging.basicConfig(level=logging.CRITICAL, format='%(asctime)s : %(levelname)s : %(message)s')
 
-def get_detailed_stats(dbconnstr):
+def get_ipversion_stats(dbconnstr):
     client = MongoClient(dbconnstr)
     db = client.get_default_database()
-    stats = dict()
+    ipv4_stats = dict()
+    ipv4_stats['num_Valid'] = 0
+    ipv4_stats['num_InvalidAS'] = 0
+    ipv4_stats['num_InvalidLength'] = 0
+    ipv4_stats['num_NotFound'] = 0
+    ipv4_stats['num_ips'] = 0
+    ipv4_stats['len_pfxs'] = []
+    ipv6_stats = dict()
+    ipv6_stats['num_Valid'] = 0
+    ipv6_stats['num_InvalidAS'] = 0
+    ipv6_stats['num_InvalidLength'] = 0
+    ipv6_stats['num_NotFound'] = 0
+    ipv6_stats['num_ips'] = 0
+    ipv6_stats['len_pfxs'] = []
     if "validity_latest" in db.collection_names() and db.validity_latest.count() > 0:
         try:
             pipeline = [ {
@@ -23,15 +36,50 @@ def get_detailed_stats(dbconnstr):
                             "valitidy": "$value.validated_route.validity.state"
                         }
                     }
-                }
+                },
+                #{ "$unwind": "$origins" },
             } ]
-            results = db.validity_latest.aggregate(pipeline, allowDiskUse=True)
+            results = list(db.validity_latest.aggregate(pipeline, allowDiskUse=True))
         except Exception, e:
             logging.exception ("QUERY failed with: " + e.message)
         else:
             for r in results:
-                print str(r)
-    return stats
+                ip = IPNetwork(r['_id'])
+                b_val = {"Valid": False, "InvalidLength": False, "InvalidAS": False, "NotFound": False}
+                if ip.version == 4:
+                    for o in r['origins']:
+                        ipv4_stats["origins_"+o['validity']] += 1
+                        b_val[o['validity']] = True
+                    if b_val['Valid'] == True:
+                        ipv4_stats["ips_Valid"] += ip.size
+                        ipv4_stats["pfx_Valid"].append(ip.prefixlen)
+                    elif b_val['InvalidLength'] == True:
+                        ipv4_stats["ips_InvalidLength"] += ip.size
+                        ipv4_stats["pfx_InvalidLength"].append(ip.prefixlen)
+                    elif b_val['InvalidAS'] == True:
+                        ipv4_stats["ips_InvalidAS"] += ip.size
+                        ipv4_stats["pfx_InvalidAS"].append(ip.prefixlen)
+                    elif b_val['NotFound'] == True:
+                        ipv4_stats["ips_NotFound"] += ip.size
+                        ipv4_stats["pfx_NotFound"].append(ip.prefixlen)
+                elif ip.version == 6:
+                    for o in r['origins']:
+                        ipv6_stats["origins_"+o['validity']] += 1
+                        b_val[o['validity']] = True
+                    if b_val['Valid'] == True:
+                        ipv6_stats["ips_Valid"] += ip.size
+                        ipv6_stats["pfx_Valid"].append(ip.prefixlen)
+                    elif b_val['InvalidLength'] == True:
+                        ipv6_stats["ips_InvalidLength"] += ip.size
+                        ipv6_stats["pfx_InvalidLength"].append(ip.prefixlen)
+                    elif b_val['InvalidAS'] == True:
+                        ipv6_stats["ips_InvalidAS"] += ip.size
+                        ipv6_stats["pfx_InvalidAS"].append(ip.prefixlen)
+                    elif b_val['NotFound'] == True:
+                        ipv6_stats["ips_NotFound"] += ip.size
+                        ipv6_stats["pfx_NotFound"].append(ip.prefixlen)
+
+    return ipv4_stats, ipv6_stats
 
 def get_validation_stats(dbconnstr):
     client = MongoClient(dbconnstr)
@@ -48,7 +96,7 @@ def get_validation_stats(dbconnstr):
         try:
             pipeline = [
                 { "$match": { 'value.type': 'announcement'} },
-                { "$group": { "_id": "$value.validated_route.validity.state", "count": { "$sum": 1} } }
+                { "$group": { "_id": "$value.validated_route.validity.state", "count": { "$sum": 1 } } }
             ]
             results = list(db.validity_latest.aggregate(pipeline, allowDiskUse=True ))
             for i in range(0,len(results)):
