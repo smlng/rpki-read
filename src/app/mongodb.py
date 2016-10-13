@@ -50,7 +50,7 @@ def get_ipversion_stats(dbconnstr):
             logging.exception ("QUERY failed with: " + e.message)
         else:
             for r in results:
-                if not r['_id']:
+                if r['_id'] == None:
                     logging.debug("emtpy record, skipping")
                     continue
                 logging.debug(str(r))
