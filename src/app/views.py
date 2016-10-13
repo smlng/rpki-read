@@ -4,7 +4,6 @@ import logging
 import markdown
 import sys
 import socket
-import threading
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import render_template, Markup, request
@@ -23,13 +22,11 @@ g_dash_stats = dict()
 g_ipv4_stats = dict()
 g_ipv6_stats = dict()
 
-stats_lock = threading.Lock()
-
 def update_validation_stats():
+    print "update_validation_stats"
     global g_dash_stats, g_ipv4_stats, g_ipv6_stats
-    with stats_lock:
-        g_dash_stats = get_validation_stats(config.DATABASE_CONN)
-        g_ipv4_stats, g_ipv6_stats = get_ipversion_stats(config.DATABASE_CONN)
+    g_dash_stats = get_validation_stats(config.DATABASE_CONN)
+    g_ipv4_stats, g_ipv6_stats = get_ipversion_stats(config.DATABASE_CONN)
 
 @app.before_first_request
 def initialize():
@@ -59,9 +56,7 @@ def about():
 @app.route('/dashboard')
 @app.route('/search', methods=['GET'])
 def dashboard():
-    stats_lock.acquire()
     dash_stats = g_dash_stats.copy()
-    stats_lock.release()
     table = [['Validity', 'Count']]
     table.append([ 'Valid', dash_stats['num_Valid'] ])
     table.append([ 'Invalid Length', dash_stats['num_InvalidLength'] ])
@@ -76,11 +71,10 @@ def dashboard():
 ## stats handler
 @app.route('/stats')
 def stats():
-    stats_lock.acquire()
+    print "stats"
     ipv4_stats = g_ipv4_stats.copy()
     ipv6_stats = g_ipv6_stats.copy()
     dash_stats = g_dash_stats.copy()
-    stats_lock.release()
     stats=dict()
     try:
         # ipv4 origin stats
@@ -114,6 +108,7 @@ def stats():
         stats['latest_ts'] = dash_stats['latest_ts']
     except Exception, e:
         logging.exception ("stats with: " + e.message)
+        print "stats: error " + e.message
     else:
         return render_template("stats.html", stats=stats)
 
