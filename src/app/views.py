@@ -17,6 +17,8 @@ else:
     logging.critical("unknown database type!")
     sys.exit(1)
 
+logging.basicConfig(level=logging.CRITICAL, format='%(asctime)s : %(levelname)s : %(message)s')
+
 g_dash_stats = dict()
 g_ipv4_stats = dict()
 g_ipv6_stats = dict()
@@ -80,36 +82,40 @@ def stats():
     dash_stats = g_dash_stats.copy()
     stats_lock.release()
     stats=dict()
-    # ipv4 origin stats
-    table = [['Validity', 'Count']]
-    table.append([ 'Valid', ipv4_stats['origins_Valid'] ])
-    table.append([ 'Invalid Length', ipv4_stats['origins_InvalidLength'] ])
-    table.append([ 'Invalid AS', ipv4_stats['origins_InvalidAS'] ])
-    table_all.append([ 'Not Found', ipv4_stats['origins_NotFound'] ])
-    stats['ipv4_origins'] = table
-    # ipv4 space coverage stats
-    table = [['Validity', 'Count']]
-    table.append([ 'Valid', ipv4_stats['ips_Valid'] ])
-    table.append([ 'Invalid Length', ipv4_stats['ips_InvalidLength'] ])
-    table.append([ 'Invalid AS', ipv4_stats['ips_InvalidAS'] ])
-    table_all.append([ 'Not Found', ipv4_stats['ips_NotFound'] ])
-    stats['ipv4_coverage'] = table
-    # ipv6 origin stats
-    table = [['Validity', 'Count']]
-    table.append([ 'Valid', ipv6_stats['origins_Valid'] ])
-    table.append([ 'Invalid Length', ipv6_stats['origins_InvalidLength'] ])
-    table.append([ 'Invalid AS', ipv6_stats['origins_InvalidAS'] ])
-    table_all.append([ 'Not Found', ipv6_stats['origins_NotFound'] ])
-    stats['ipv6_origins'] = table
-    # ipv6 space coverage stats
-    table = [['Validity', 'Count']]
-    table.append([ 'Valid', ipv6_stats['ips_Valid'] ])
-    table.append([ 'Invalid Length', ipv6_stats['ips_InvalidLength'] ])
-    table.append([ 'Invalid AS', ipv6_stats['ips_InvalidAS'] ])
-    table_all.append([ 'Not Found', ipv6_stats['ips_NotFound'] ])
-    stats['ipv6_coverage'] = table
-    stats['latest_ts'] = dash_stats['latest_ts']
-    return render_template("stats.html", stats=stats)
+    try:
+        # ipv4 origin stats
+        table = [['Validity', 'Count']]
+        table.append([ 'Valid', ipv4_stats['origins_Valid'] ])
+        table.append([ 'Invalid Length', ipv4_stats['origins_InvalidLength'] ])
+        table.append([ 'Invalid AS', ipv4_stats['origins_InvalidAS'] ])
+        table_all.append([ 'Not Found', ipv4_stats['origins_NotFound'] ])
+        stats['ipv4_origins'] = table
+        # ipv4 space coverage stats
+        table = [['Validity', 'Count']]
+        table.append([ 'Valid', ipv4_stats['ips_Valid'] ])
+        table.append([ 'Invalid Length', ipv4_stats['ips_InvalidLength'] ])
+        table.append([ 'Invalid AS', ipv4_stats['ips_InvalidAS'] ])
+        table_all.append([ 'Not Found', ipv4_stats['ips_NotFound'] ])
+        stats['ipv4_coverage'] = table
+        # ipv6 origin stats
+        table = [['Validity', 'Count']]
+        table.append([ 'Valid', ipv6_stats['origins_Valid'] ])
+        table.append([ 'Invalid Length', ipv6_stats['origins_InvalidLength'] ])
+        table.append([ 'Invalid AS', ipv6_stats['origins_InvalidAS'] ])
+        table_all.append([ 'Not Found', ipv6_stats['origins_NotFound'] ])
+        stats['ipv6_origins'] = table
+        # ipv6 space coverage stats
+        table = [['Validity', 'Count']]
+        table.append([ 'Valid', ipv6_stats['ips_Valid'] ])
+        table.append([ 'Invalid Length', ipv6_stats['ips_InvalidLength'] ])
+        table.append([ 'Invalid AS', ipv6_stats['ips_InvalidAS'] ])
+        table_all.append([ 'Not Found', ipv6_stats['ips_NotFound'] ])
+        stats['ipv6_coverage'] = table
+        stats['latest_ts'] = dash_stats['latest_ts']
+    except Exception, e:
+        logging.exception ("stats with: " + e.message)
+    else:
+        return render_template("stats.html", stats=stats)
 
 ## table handler
 @app.route('/valid')
