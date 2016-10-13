@@ -11,20 +11,19 @@ logging.basicConfig(level=logging.CRITICAL, format='%(asctime)s : %(levelname)s 
 def get_ipversion_stats(dbconnstr):
     client = MongoClient(dbconnstr)
     db = client.get_default_database()
+    types = ['origins_', 'ips_', 'pfx_']
     ipv4_stats = dict()
-    ipv4_stats['num_Valid'] = 0
-    ipv4_stats['num_InvalidAS'] = 0
-    ipv4_stats['num_InvalidLength'] = 0
-    ipv4_stats['num_NotFound'] = 0
-    ipv4_stats['num_ips'] = 0
-    ipv4_stats['len_pfxs'] = []
+    for t in types:
+        ipv4_stats[t+'Valid'] = 0
+        ipv4_stats[t+'InvalidAS'] = 0
+        ipv4_stats[t+'InvalidLength'] = 0
+        ipv4_stats[t+'NotFound'] = 0
     ipv6_stats = dict()
-    ipv6_stats['num_Valid'] = 0
-    ipv6_stats['num_InvalidAS'] = 0
-    ipv6_stats['num_InvalidLength'] = 0
-    ipv6_stats['num_NotFound'] = 0
-    ipv6_stats['num_ips'] = 0
-    ipv6_stats['len_pfxs'] = []
+    for t in types:
+        ipv6_stats[t+'Valid'] = 0
+        ipv6_stats[t+'InvalidAS'] = 0
+        ipv6_stats[t+'InvalidLength'] = 0
+        ipv6_stats[t+'NotFound'] = 0
     if "validity_latest" in db.collection_names() and db.validity_latest.count() > 0:
         try:
             pipeline = [ {
@@ -44,6 +43,7 @@ def get_ipversion_stats(dbconnstr):
             logging.exception ("QUERY failed with: " + e.message)
         else:
             for r in results:
+                print str(r)
                 ip = IPNetwork(r['_id'])
                 b_val = {"Valid": False, "InvalidLength": False, "InvalidAS": False, "NotFound": False}
                 if ip.version == 4:
